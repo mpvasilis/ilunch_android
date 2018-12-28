@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "776859434555",
+    "firebase_url": "https://scenic-scholar-552.firebaseio.com",
+    "project_id": "scenic-scholar-552",
+    "storage_bucket": "scenic-scholar-552.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:776859434555:android:36aac195202541d0",
+        "android_client_info": {
+          "package_name": "com.alexmodis.bestbeforeapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "776859434555-rqkkilua1v0piof4l0245t10eckvpr5m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjR4fprvRtIM-asC06oC8QLgc7W_1R6es"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
