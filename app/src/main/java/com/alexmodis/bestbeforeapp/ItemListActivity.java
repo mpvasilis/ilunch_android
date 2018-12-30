@@ -207,36 +207,7 @@ public class ItemListActivity extends AppCompatActivity {
     }
 
 
-    //Trigger alarm manager with entered time interval
-    public void triggerAlarmManager(int alarmTriggerTime) {
-        // get a Calendar object with current time
-        Calendar cal = Calendar.getInstance();
-        // add alarmTriggerTime seconds to the calendar object
-        cal.add(Calendar.SECOND, alarmTriggerTime);
 
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);//get instance of alarm manager
-        manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);//set alarm manager with entered timer by converting into milliseconds
-
-        Toast.makeText(this, "Alarm Set for " + alarmTriggerTime + " seconds.", Toast.LENGTH_SHORT).show();
-    }
-
-    //Stop/Cancel alarm manager
-    public void stopAlarmManager() {
-
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        manager.cancel(pendingIntent);//cancel the alarm manager of the pending intent
-
-
-        //Stop the Media Player Service to stop sound
-        // stopService(new Intent(Item.this, AlarmSoundService.class));
-
-        //remove the notification from notification tray
-        NotificationManager notificationManager = (NotificationManager) this
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(AlarmNotificationService.NOTIFICATION_ID);
-
-        Toast.makeText(this, "Alarm Canceled/Stop by User.", Toast.LENGTH_SHORT).show();
-    }
 
 
 }

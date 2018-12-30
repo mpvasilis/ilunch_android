@@ -1,8 +1,5 @@
 package com.alexmodis.bestbeforeapp.Util;
 
-/**
- * Created by Jaison.
- */
 public class BarcodeScanner {
     public static class Constants {
         public static final int PERMISSION_REQUEST_CAMERA = 1001;
@@ -21,7 +18,6 @@ public class BarcodeScanner {
         public static final int FOCUS_TAP = 2;
         public static final int FOCUS_TAP_WITH_MARKER = 3;
 
-
     }
 
     static class Defaults {
@@ -30,7 +26,4 @@ public class BarcodeScanner {
         static final int DEFAULT_FOCUS = Constants.FOCUS_CONTINUOUS;
     }
 
-    public static class MessageStrings {
-        public static final String ERROR_LOW_STORAGE = "QR Scanner dependencies cannot be downloaded due to low device storage";
-    }
 }

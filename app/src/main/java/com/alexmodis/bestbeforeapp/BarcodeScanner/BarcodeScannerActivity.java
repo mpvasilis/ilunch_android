@@ -2,6 +2,7 @@ package com.alexmodis.bestbeforeapp.BarcodeScanner;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,7 +10,6 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -21,10 +21,12 @@ import com.alexmodis.bestbeforeapp.BarCodeScannerUtil.common.CameraSource;
 import com.alexmodis.bestbeforeapp.BarCodeScannerUtil.common.CameraSourcePreview;
 import com.alexmodis.bestbeforeapp.BarCodeScannerUtil.common.FrameMetadata;
 import com.alexmodis.bestbeforeapp.BarCodeScannerUtil.common.GraphicOverlay;
+import com.alexmodis.bestbeforeapp.Item;
+import com.alexmodis.bestbeforeapp.ItemDetailActivity;
+import com.alexmodis.bestbeforeapp.ItemDetailDataEntry;
 import com.alexmodis.bestbeforeapp.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
@@ -35,6 +37,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 
 public class BarcodeScannerActivity extends AppCompatActivity {
     public static final int PERMISSION_REQUEST_CAMERA = 1001;
@@ -138,18 +143,13 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         preview.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    /**
-     * Restarts the camera.
-     */
+
     @Override
     protected void onResume() {
         super.onResume();
         startCameraSource();
     }
 
-    /**
-     * Stops the camera.
-     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -163,10 +163,6 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         isCalled = true;
     }
 
-    /**
-     * Releases the resources associated with the camera source, the associated detector, and the
-     * rest of the processing pipeline.
-     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -206,14 +202,12 @@ public class BarcodeScannerActivity extends AppCompatActivity {
 
                 for (FirebaseVisionBarcode barCode : barcodes) {
 
-                    Log.d(TAG, "onSuccess: " + barCode.getRawValue());
-                    Log.d(TAG, "onSuccess: " + barCode.getFormat());
-                    Log.d(TAG, "onSuccess: " + barCode.getValueType());
                     showToast("Barcode detected " + barCode.getRawValue());
+                    processBarcode(barCode.getRawValue());
+
                 }
 
-                if (isAdded)
-                    finish();
+
             }
 
             @Override
@@ -237,5 +231,36 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         }
         toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    public void processBarcode(String barcode) {
+        Realm.init(getApplicationContext());
+        RealmConfiguration realmConfig = new RealmConfiguration.
+                Builder().
+                deleteRealmIfMigrationNeeded().
+                build();
+        Realm.setDefaultConfiguration(realmConfig);
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        final RealmResults<Item> items = realm.where(Item.class).equalTo("barcode", barcode).findAll();
+        realm.commitTransaction();
+        if (items.size() > 0) {
+            final Item item = items.get(0);
+            showToast("Found product " + item.getName());
+            Intent intent = new Intent(getApplicationContext(), ItemDetailActivity.class);
+            intent.putExtra("item_id", Integer.parseInt(String.valueOf(item.getId())));
+            intent.putExtra("item_name", item.getName());
+            startActivity(intent);
+            finish();
+        } else {
+            showToast("Product not found in database. Please insert.");
+            Intent intent = new Intent(getApplicationContext(), ItemDetailDataEntry.class);
+            intent.putExtra("barcode", barcode);
+            startActivity(intent);
+            finish();
+
+        }
+
+
     }
 }

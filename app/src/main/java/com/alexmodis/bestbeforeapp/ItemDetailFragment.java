@@ -85,13 +85,10 @@ public class ItemDetailFragment extends Fragment {
         Button itemQuantityRemoveButton = rootView.findViewById(R.id.item_quantity_remove);
 
         Button itemDeleteButton = rootView.findViewById(R.id.item_detail_delete);
-        Button itemReorderButton = rootView.findViewById(R.id.item_detail_reorder);
 
-        // Set the TextViews
         itemexpiryDateView.setText(itemexpiryDate);
         itemQtyView.setText(itemQtyString);
 
-        // Set the button click listeners
         sellItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,12 +107,7 @@ public class ItemDetailFragment extends Fragment {
                 quantityRemove(itemId, 1);
             }
         });
-        itemReorderButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                itemReorder(itemId);
-            }
-        });
+
         itemDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -185,12 +177,7 @@ public class ItemDetailFragment extends Fragment {
 
     }
 
-    /**
-     * updateQuantityView
-     * This methods handles updating the Quantity on Hand View
-     *
-     * @param newQty the new qty to be displayed
-     */
+
     private void updateQuantityView(String newQty) {
         if (rootView == null) {
             return;
@@ -200,27 +187,14 @@ public class ItemDetailFragment extends Fragment {
     }
 
 
-    /**
-     * sellItem
-     * This method is attached to the sell FAB button
-     *
-     * @param itemId the id of the item being sold
-     */
     private void sellItem(int itemId) {
         sellTransaction(itemId);
     }
 
-    /**
-     * sellTransaction
-     * This method comples a sale transaction
-     * It validates that there is enough quantity to be sold, and adjusts the item's quantity if the
-     * sale is valid
-     *
-     * @param itemId the id of the item being sold
-     */
+
     private void sellTransaction(final int itemId) {
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        final View view = inflater.inflate(com.alexmodis.bestbeforeapp.R.layout.item_sell_dialog, null);
+        final View view = inflater.inflate(com.alexmodis.bestbeforeapp.R.layout.item_dialog, null);
 
         Realm.init(getContext());
         RealmConfiguration realmConfig = new RealmConfiguration.
@@ -271,18 +245,11 @@ public class ItemDetailFragment extends Fragment {
                     }
                 })
                 .show();
-        // Automatically pop up the keyboard
-        // See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext
         alertbox.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
     }
 
-    /**
-     * itemReorder
-     * This method handles creating an order request to the vendor
-     *
-     * @param itemId the id of the item being reordered
-     */
+
     private void itemReorder(int itemId) {
 
         Realm.init(getContext());
@@ -302,14 +269,7 @@ public class ItemDetailFragment extends Fragment {
 
     }
 
-    /**
-     * composeEmail
-     * This method launches an intent to open the email application with some information filled in
-     *
-     * @param recipients the email address that you're sending the email to
-     * @param subject    the email subject
-     * @param message    the email body
-     */
+
     private void composeEmail(String[] recipients, String subject, String message) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:")); // only email apps should handle this
@@ -322,12 +282,7 @@ public class ItemDetailFragment extends Fragment {
         }
     }
 
-    /**
-     * itemDelete
-     * This method deletes the item and finishes the Detail Activity
-     *
-     * @param itemId the item to be deleted from the database
-     */
+
     private void itemDelete(final int itemId) {
         AlertDialog alertbox = new AlertDialog.Builder(getActivity())
                 .setMessage("Delete Item")
@@ -351,7 +306,6 @@ public class ItemDetailFragment extends Fragment {
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    // do something when the button is clicked
                     public void onClick(DialogInterface arg0, int arg1) {
                     }
                 })

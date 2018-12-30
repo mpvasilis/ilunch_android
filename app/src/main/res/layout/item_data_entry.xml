@@ -100,6 +100,7 @@
                     android:id="@+id/item_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="Product name..."
                     android:imeOptions="flagNoFullscreen"
                     android:inputType="text" />
             </LinearLayout>
@@ -123,6 +124,7 @@
                     android:id="@+id/item_quantity"
                     android:layout_width="125dp"
                     android:layout_height="wrap_content"
+                    android:hint="ex.: 1"
                     android:imeOptions="flagNoFullscreen"
                     android:inputType="number" />
             </LinearLayout>
@@ -144,8 +146,9 @@
 
                 <EditText
                     android:id="@+id/item_barcode"
-                    android:layout_width="125dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="Barcode of product...."
                     android:imeOptions="flagNoFullscreen"
                     android:inputType="numberDecimal" />
             </LinearLayout>
@@ -154,9 +157,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="12dp"
+                android:layout_marginEnd="12dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -166,12 +169,29 @@
                     android:labelFor="@+id/expiryDate"
                     android:text="@string/item_detail_data_entry_item_expiryDate" />
 
-                <EditText
-                    android:id="@+id/expiryDate"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="date" />
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/expiryDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ems="10"
+                        android:hint="Expiry Date (ex: 30/12/2020)"
+                        android:inputType="date" />
+
+                    <ImageButton
+                        android:id="@+id/expiryDatescan"
+                        android:layout_weight="5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@android:drawable/ic_menu_camera" />
+                </LinearLayout>
+
+
             </LinearLayout>
 
         </LinearLayout>

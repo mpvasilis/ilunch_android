@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -32,12 +33,38 @@ import io.realm.RealmResults;
 
 public class ItemDetailDataEntry extends AppCompatActivity {
     private static final String LOG_TAG = ItemDetailDataEntry.class.getSimpleName();
+    private EditText nameField;
+    private EditText quantityField;
+    private EditText expiryDateField;
+    private EditText barcodeField;
+
+    private ImageButton expiryDatescan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.e(LOG_TAG, "onCreate" + true);
         setContentView(R.layout.item_data_entry);
+        String barcode = "";
+        barcode = getIntent().getStringExtra("barcode");
+
+        nameField = this.findViewById(R.id.item_name);
+        quantityField = this.findViewById(R.id.item_quantity);
+        expiryDateField = this.findViewById(R.id.expiryDate);
+        barcodeField = this.findViewById(R.id.item_barcode);
+
+        barcodeField.setText(barcode);
+
+        expiryDatescan = this.findViewById(R.id.expiryDatescan);
+
+        expiryDatescan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent barcodeScanner = new Intent(getApplicationContext(), com.alexmodis.bestbeforeapp.ExpiryDateScanner.ExpiryDateScannerActivity.class);
+                startActivityForResult(barcodeScanner, 200);
+            }
+        });
+
     }
 
 
@@ -61,11 +88,6 @@ public class ItemDetailDataEntry extends AppCompatActivity {
         Integer quantity = null;
         Date expiryDate = null;
         String barcode = null;
-
-        EditText nameField = this.findViewById(R.id.item_name);
-        EditText quantityField = this.findViewById(R.id.item_quantity);
-        EditText expiryDateField = this.findViewById(R.id.expiryDate);
-        EditText barcodeField = this.findViewById(R.id.item_barcode);
 
 
         if (nameField != null) {
@@ -128,7 +150,7 @@ public class ItemDetailDataEntry extends AppCompatActivity {
             realm.copyToRealmOrUpdate(newItem);
             realm.commitTransaction();
 
-            toastText = "Item Saved!";
+            toastText = "Product Saved!";
             Toast toast = Toast.makeText(context, toastText, duration);
             toast.show();
 
@@ -152,16 +174,14 @@ public class ItemDetailDataEntry extends AppCompatActivity {
 
     private void cancelNewItem() {
         AlertDialog alertbox = new AlertDialog.Builder(this)
-                .setMessage("Cancel the New Item?")
+                .setMessage("Cancel the New Product?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    // do something when the button is clicked
                     public void onClick(DialogInterface arg0, int arg1) {
                         finish();
                         //close();
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    // do something when the button is clicked
                     public void onClick(DialogInterface arg0, int arg1) {
                     }
                 })
