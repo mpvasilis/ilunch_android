@@ -50,7 +50,4 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 }
 
-realm {
-    syncEnabled = true
-}
 apply plugin: 'com.google.gms.google-services'
