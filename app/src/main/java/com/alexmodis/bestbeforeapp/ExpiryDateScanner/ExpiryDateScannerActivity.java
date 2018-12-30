@@ -1,7 +1,9 @@
 package com.alexmodis.bestbeforeapp.ExpiryDateScanner;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,13 +25,12 @@ import com.alexmodis.bestbeforeapp.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import butterknife.BindView;
@@ -48,7 +49,7 @@ public class ExpiryDateScannerActivity extends AppCompatActivity {
     @BindView(R.id.overlayView)
     OverlayView overlayView;
 
-    ExpiryDayScanningProcessor barcodeScanningProcessor;
+    ExpiryDayScanningProcessor expirydatescannerproccessor;
 
     private CameraSource mCameraSource = null;
 
@@ -89,10 +90,10 @@ public class ExpiryDateScannerActivity extends AppCompatActivity {
         mCameraSource = new CameraSource(this, barcodeOverlay);
         mCameraSource.setFacing(CameraSource.CAMERA_FACING_BACK);
 
-        barcodeScanningProcessor = new ExpiryDayScanningProcessor();
-        barcodeScanningProcessor.setListener(barcodeScanningProcessor.gettListener());
+        expirydatescannerproccessor = new ExpiryDayScanningProcessor();
+        expirydatescannerproccessor.setListener(gettListener());
 
-        mCameraSource.setMachineLearningFrameProcessor(barcodeScanningProcessor);
+        mCameraSource.setMachineLearningFrameProcessor(expirydatescannerproccessor);
 
 
         startCameraSource();
@@ -133,18 +134,13 @@ public class ExpiryDateScannerActivity extends AppCompatActivity {
         preview.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    /**
-     * Restarts the camera.
-     */
+
     @Override
     protected void onResume() {
         super.onResume();
         startCameraSource();
     }
 
-    /**
-     * Stops the camera.
-     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -158,10 +154,7 @@ public class ExpiryDateScannerActivity extends AppCompatActivity {
         isCalled = true;
     }
 
-    /**
-     * Releases the resources associated with the camera source, the associated detector, and the
-     * rest of the processing pipeline.
-     */
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -192,13 +185,19 @@ public class ExpiryDateScannerActivity extends AppCompatActivity {
         mHandler.sendMessage(msg);
     };
 
-    public ExpiryDayScanningProcessor.ExpiryDateResultListener getBarcodeResultListener() {
+    public ExpiryDayScanningProcessor.ExpiryDateResultListener gettListener() {
 
         return new ExpiryDayScanningProcessor.ExpiryDateResultListener() {
 
             @Override
             public void onSuccess(@Nullable Bitmap originalCameraImage, @NonNull FirebaseVisionText texts, @NonNull FrameMetadata frameMetadata, @NonNull GraphicOverlay graphicOverlay) {
-                showToast(" detected " + texts.getText());
+                if (isValidDate(texts.getText())) {
+                    showToast("Detected " + texts.getText());
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("expiryday_detected", texts.getText());
+                    setResult(Activity.RESULT_OK, returnIntent);
+                    finish();
+                }
 
             }
 
@@ -224,4 +223,16 @@ public class ExpiryDateScannerActivity extends AppCompatActivity {
         toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT);
         toast.show();
     }
+
+    public static boolean isValidDate(String inDate) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        dateFormat.setLenient(false);
+        try {
+            dateFormat.parse(inDate.trim());
+        } catch (ParseException pe) {
+            return false;
+        }
+        return true;
+    }
+
 }

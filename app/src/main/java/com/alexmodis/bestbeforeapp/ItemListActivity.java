@@ -102,10 +102,6 @@ public class ItemListActivity extends AppCompatActivity {
                 Intent settings = new Intent(this, SettingsActivity.class);
                 startActivity(settings);
                 return true;
-            case R.id.test_ocr:
-                Intent barcodeScanner = new Intent(this, com.alexmodis.bestbeforeapp.ExpiryDateScanner.ExpiryDateScannerActivity.class);
-                startActivity(barcodeScanner);
-                return true;
             case R.id.test_notification:
                 setupAlarm();
                 return true;

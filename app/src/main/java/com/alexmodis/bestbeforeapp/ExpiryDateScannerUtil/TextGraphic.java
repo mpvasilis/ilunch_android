@@ -50,7 +50,6 @@ public class TextGraphic extends GraphicOverlay.Graphic {
         rect.bottom = translateY(rect.bottom);
         canvas.drawRect(rect, rectPaint);
 
-        // Renders the ftext at the bottom of the box.
         canvas.drawText(ftext.getText(), rect.left, rect.bottom, ftextPaint);
     }
 

@@ -75,6 +75,13 @@ public class ItemDetailDataEntry extends AppCompatActivity {
             Uri uri = data.getData();
 
         }
+
+        if (requestCode == 200) {
+            if (resultCode == RESULT_OK) {
+                expiryDateField.setText(data.getStringExtra("expiryday_detected"));
+            }
+
+        }
     }
 
     public void saveNewItemButton(View view) {
@@ -188,5 +195,6 @@ public class ItemDetailDataEntry extends AppCompatActivity {
                 .show();
 
     }
+
 
 }

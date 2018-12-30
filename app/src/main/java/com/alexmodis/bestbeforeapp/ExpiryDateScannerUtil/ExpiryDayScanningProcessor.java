@@ -11,13 +11,14 @@ import com.alexmodis.bestbeforeapp.ExpiryDateScannerUtil.common.FrameMetadata;
 import com.alexmodis.bestbeforeapp.ExpiryDateScannerUtil.common.GraphicOverlay;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class ExpiryDayScanningProcessor extends VisionProcessorBase<FirebaseVisionText> {
@@ -37,8 +38,8 @@ public class ExpiryDayScanningProcessor extends VisionProcessorBase<FirebaseVisi
         return expiryDateResultListener;
     }
 
-    public void setListener(ExpiryDateResultListener barcodeResultListener) {
-        this.expiryDateResultListener = barcodeResultListener;
+    public void setListener(ExpiryDateResultListener listener) {
+        this.expiryDateResultListener = listener;
     }
 
     @Override
@@ -75,7 +76,9 @@ public class ExpiryDayScanningProcessor extends VisionProcessorBase<FirebaseVisi
                 for (int k = 0; k < elements.size(); k++) {
                     GraphicOverlay.Graphic textGraphic = new TextGraphic(graphicOverlay,
                             elements.get(k));
-                    graphicOverlay.add(textGraphic);
+                    if (isValidDate(results.getText())) {
+                        graphicOverlay.add(textGraphic);
+                    }
                 }
             }
         }
@@ -87,6 +90,8 @@ public class ExpiryDayScanningProcessor extends VisionProcessorBase<FirebaseVisi
 
     @Override
     protected void onFailure(@NonNull Exception e) {
+        if (expiryDateResultListener != null)
+            expiryDateResultListener.onFailure(e);
         Log.w(TAG, "Text detection failed." + e);
     }
 
@@ -98,5 +103,16 @@ public class ExpiryDayScanningProcessor extends VisionProcessorBase<FirebaseVisi
                 @NonNull GraphicOverlay graphicOverlay);
 
         void onFailure(@NonNull Exception e);
+    }
+
+    public static boolean isValidDate(String inDate) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        dateFormat.setLenient(false);
+        try {
+            dateFormat.parse(inDate.trim());
+        } catch (ParseException pe) {
+            return false;
+        }
+        return true;
     }
 }

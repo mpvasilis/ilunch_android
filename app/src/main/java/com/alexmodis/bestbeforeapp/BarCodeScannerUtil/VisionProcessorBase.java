@@ -20,14 +20,12 @@ import java.nio.ByteBuffer;
 
 public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
 
-    // To keep the latest images and its metadata.
     @GuardedBy("this")
     private ByteBuffer latestImage;
 
     @GuardedBy("this")
     private FrameMetadata latestImageMetaData;
 
-    // To keep the images and metadata in process.
     @GuardedBy("this")
     private ByteBuffer processingImage;
 
@@ -107,12 +105,7 @@ public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
 
     protected abstract Task<T> detectInImage(FirebaseVisionImage image);
 
-    /**
-     * Callback that executes with a successful detection result.
-     *
-     * @param originalCameraImage hold the original image from camera, used to draw the background
-     *                            image.
-     */
+
     protected abstract void onSuccess(
             @Nullable Bitmap originalCameraImage,
             @NonNull T results,
