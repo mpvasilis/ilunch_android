@@ -79,7 +79,7 @@ public class ItemDetailFragment extends Fragment {
         TextView itemQtyView = rootView.findViewById(R.id.item_detail_qty);
 
 
-        FloatingActionButton sellItemButton = getActivity().findViewById(R.id.item_detail_sell);
+        FloatingActionButton editItemButton = getActivity().findViewById(R.id.item_edit);
 
         Button itemQuantityAddButton = rootView.findViewById(R.id.item_quantity_add);
         Button itemQuantityRemoveButton = rootView.findViewById(R.id.item_quantity_remove);
@@ -89,10 +89,10 @@ public class ItemDetailFragment extends Fragment {
         itemexpiryDateView.setText(itemexpiryDate);
         itemQtyView.setText(itemQtyString);
 
-        sellItemButton.setOnClickListener(new View.OnClickListener() {
+        editItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sellItem(itemId);
+                editItem(itemId);
             }
         });
         itemQuantityAddButton.setOnClickListener(new View.OnClickListener() {
@@ -127,14 +127,6 @@ public class ItemDetailFragment extends Fragment {
         modifyQuantityOnHand("remove", itemId, itemQty);
     }
 
-    /**
-     * modifyQuantityOnHand
-     * This method is called from the button methods and from the sell method
-     *
-     * @param action  add or remove
-     * @param itemId  the id of the item being adjusted
-     * @param itemQty the qty to be added or removed
-     */
     private void modifyQuantityOnHand(String action, int itemId, int itemQty) {
 
 
@@ -187,105 +179,15 @@ public class ItemDetailFragment extends Fragment {
     }
 
 
-    private void sellItem(int itemId) {
-        sellTransaction(itemId);
-    }
-
-
-    private void sellTransaction(final int itemId) {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        final View view = inflater.inflate(com.alexmodis.bestbeforeapp.R.layout.item_dialog, null);
-
-        Realm.init(getContext());
-        RealmConfiguration realmConfig = new RealmConfiguration.
-                Builder().
-                deleteRealmIfMigrationNeeded().
-                build();
-        Realm.setDefaultConfiguration(realmConfig);
-        Realm.setDefaultConfiguration(realmConfig);
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        final RealmResults<Item> items = realm.where(Item.class).equalTo("id", itemId).findAll();
-        final Item item = items.get(0);
-        realm.commitTransaction();
-
-        AlertDialog alertbox = new AlertDialog.Builder(getActivity())
-                .setView(view)
-                .setMessage("New Sale")
-                .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        EditText sellQtyView = view.findViewById(R.id.item_sale_qty);
-
-                        String sellQtyString = sellQtyView.getText().toString();
-                        int sellQty = Integer.parseInt(sellQtyString);
-                        int newQty = item.getQuantity() - sellQty;
-
-                        if (newQty < 0) {
-                            Context context = getContext().getApplicationContext();
-                            CharSequence text = "You don't have enough to sell.";
-                            int duration = Toast.LENGTH_SHORT;
-                            Toast toast = Toast.makeText(context, text, duration);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                        } else {
-                            modifyQuantityOnHand("remove", itemId, sellQty);
-                            Context context = getActivity().getApplicationContext();
-                            CharSequence text = "Sold!";
-                            int duration = Toast.LENGTH_SHORT;
-                            Toast toast = Toast.makeText(context, text, duration);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                            //close();
-                        }
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface arg0, int arg1) {
-                    }
-                })
-                .show();
-        alertbox.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+    private void editItem(int itemId) {
 
     }
 
-
-    private void itemReorder(int itemId) {
-
-        Realm.init(getContext());
-        RealmConfiguration realmConfig = new RealmConfiguration.
-                Builder().
-                deleteRealmIfMigrationNeeded().
-                build();
-        Realm.setDefaultConfiguration(realmConfig);
-        Realm.setDefaultConfiguration(realmConfig);
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        final RealmResults<Item> items = realm.where(Item.class).equalTo("id", itemId).findAll();
-        final Item item = items.get(0);
-        realm.commitTransaction();
-
-        String itemName = item.getName();
-
-    }
-
-
-    private void composeEmail(String[] recipients, String subject, String message) {
-        Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-        intent.putExtra(Intent.EXTRA_EMAIL, recipients);
-        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra(Intent.EXTRA_TEXT, message);
-
-        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
 
 
     private void itemDelete(final int itemId) {
         AlertDialog alertbox = new AlertDialog.Builder(getActivity())
-                .setMessage("Delete Item")
+                .setMessage("Delete product?")
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     // do something when the button is clicked
                     public void onClick(DialogInterface arg0, int arg1) {
