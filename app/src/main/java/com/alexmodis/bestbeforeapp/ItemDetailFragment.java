@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -62,8 +63,8 @@ public class ItemDetailFragment extends Fragment {
 
 
         Item item = items.get(0);
-        //NumberFormat defaultFormat = NumberFormat.getCurrencyInstance();
-        itemexpiryDate = item.getExpiryDate().toString();
+        SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
+        itemexpiryDate = simpleDate.format(item.getExpiryDate());
         int itemQty = item.getQuantity();
         itemQtyString = Integer.toString(itemQty);
 

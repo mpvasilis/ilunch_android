@@ -7,10 +7,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
@@ -191,12 +193,30 @@ public class ItemListActivity extends AppCompatActivity {
         Realm.setDefaultConfiguration(realmConfig);
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        int short_option = Integer.parseInt(sharedPref.getString("productsortoptions", "0"));
+        String sortfield;
+        Log.e(LOG_TAG, "short " + short_option);
         final RealmResults<Item> items = realm.where(Item.class).findAll();
+        switch (short_option) {
+            case 0:
+                sortfield = "name";
+                break;
+            case 1:
+                sortfield = "expiryDate";
+                break;
+            case 2:
+                sortfield = "quantity";
+                break;
+            default:
+                sortfield = "name";
+                break;
+        }
         realm.commitTransaction();
         int size = items.size();
         Log.e(LOG_TAG, "size " + size);
         if (size > 0) {
-            recyclerView.setAdapter(new ItemListAdapter(this, realm.where(Item.class).findAllAsync()));
+            recyclerView.setAdapter(new ItemListAdapter(this, realm.where(Item.class).findAllAsync().sort(sortfield)));
             recyclerView.setHasFixedSize(true);
         }
 
