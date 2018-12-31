@@ -51,7 +51,6 @@
     </string-array>
 
 
-
     <string name="pref_header_notifications">Notifications</string>
     <string name="repeat_notification_until_expire">Repeat notification until expire</string>
 

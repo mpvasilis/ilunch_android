@@ -204,7 +204,7 @@ public class BarcodeScannerActivity extends AppCompatActivity {
 
                     showToast("Barcode detected " + barCode.getRawValue());
                     processBarcode(barCode.getRawValue());
-                    break;
+                    finish();
                 }
 
 

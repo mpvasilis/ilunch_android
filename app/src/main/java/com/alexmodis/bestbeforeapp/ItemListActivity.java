@@ -69,7 +69,7 @@ public class ItemListActivity extends AppCompatActivity {
         }
         FirebaseApp.initializeApp(this);
         Intent alarmIntent = new Intent(ItemListActivity.this, AlarmReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(ItemListActivity.this, 100, alarmIntent, 0);
+        pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 100, alarmIntent, 0);
     }
 
     @Override
@@ -117,67 +117,25 @@ public class ItemListActivity extends AppCompatActivity {
 
     private void setupAlarm() {
 
-        Calendar cal = Calendar.getInstance();
-        // add alarmTriggerTime seconds to the calendar object
-        cal.add(Calendar.SECOND, 5);
-
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);//get instance of alarm manager
-        manager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);//set alarm manager with entered timer by converting into milliseconds
-
-        Toast.makeText(this, "Alarm Set for " + 5 + " seconds.", Toast.LENGTH_SHORT).show();
-
         alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-        alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+        intent.putExtra("requestCode", 1);
+        intent.putExtra("product", "Nescafe");
+        intent.putExtra("expiryDate", "31/12/2012");
 
-        alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() +
-                        5000, alarmIntent);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        int notifybefore = Integer.parseInt(sharedPref.getString("notification_times", "5"));
 
-        Intent intent1 = new Intent(getApplicationContext(), ItemListActivity.class);
-        intent1.setAction(Intent.ACTION_MAIN);
-        intent1.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        // END_INCLUDE (intent_fired_by_alarm)
+        alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 10, intent, 0);
 
-        // BEGIN_INCLUDE (pending_intent_for_alarm)
-        // Because the intent must be fired by a system service from outside the application,
-        // it's necessary to wrap it in a PendingIntent.  Providing a different process with
-        // a PendingIntent gives that other process permission to fire the intent that this
-        // application has created.
-        // Also, this code creates a PendingIntent to start an Activity.  To create a
-        // BroadcastIntent instead, simply call getBroadcast instead of getIntent.
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 100,
-                intent1, 0);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 14);
+        calendar.set(Calendar.MINUTE, 07);
 
-        // END_INCLUDE (pending_intent_for_alarm)
+        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                1000 * 60 * 20, alarmIntent);
 
-        // BEGIN_INCLUDE (configure_alarm_manager)
-        // There are two clock types for alarms, ELAPSED_REALTIME and RTC.
-        // ELAPSED_REALTIME uses time since system boot as a reference, and RTC uses UTC (wall
-        // clock) time.  This means ELAPSED_REALTIME is suited to setting an alarm according to
-        // passage of time (every 15 seconds, 15 minutes, etc), since it isn't affected by
-        // timezone/locale.  RTC is better suited for alarms that should be dependant on current
-        // locale.
-
-        // Both types have a WAKEUP version, which says to wake up the device if the screen is
-        // off.  This is useful for situations such as alarm clocks.  Abuse of this flag is an
-        // efficient way to skyrocket the uninstall rate of an application, so use with care.
-        // For most situations, ELAPSED_REALTIME will suffice.
-        int alarmType = AlarmManager.ELAPSED_REALTIME;
-        final int FIFTEEN_SEC_MILLIS = 6000;
-
-        // The AlarmManager, like most system services, isn't created by application code, but
-        // requested from the system.
-        AlarmManager alarmManager = (AlarmManager)
-                getApplicationContext().getSystemService(getApplicationContext().ALARM_SERVICE);
-
-        // setRepeating takes a start delay and period between alarms as arguments.
-        // The below code fires after 15 seconds, and repeats every 15 seconds.  This is very
-        // useful for demonstration purposes, but horrendous for production.  Don't be that dev.
-        alarmManager.setRepeating(alarmType, SystemClock.elapsedRealtime() + FIFTEEN_SEC_MILLIS,
-                FIFTEEN_SEC_MILLIS, pendingIntent);
-        // END_INCLUDE (configure_alarm_manager);
-        Log.i("RepeatingAlarmFragment", "Alarm set.");
     }
 
 
