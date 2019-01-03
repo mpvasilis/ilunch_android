@@ -215,7 +215,7 @@ public class ItemDetailDataEntry extends AppCompatActivity {
             alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
                     AlarmManager.INTERVAL_DAY, alarmIntent);
         } else {
-            alarmMgr.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
+            alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
 
         }
 

@@ -7,5 +7,5 @@
         android:title="Settings" />
     <item
         android:id="@+id/exit"
-        android:title="Exit App" />
+        android:title="Logout" />
 </menu>
