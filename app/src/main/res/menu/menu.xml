@@ -6,9 +6,6 @@
         android:id="@+id/settings"
         android:title="Settings" />
     <item
-        android:id="@+id/test_notification"
-        android:title="Test Notification" />
-    <item
         android:id="@+id/exit"
         android:title="Exit App" />
 </menu>

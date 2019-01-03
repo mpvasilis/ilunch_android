@@ -104,9 +104,6 @@ public class ItemListActivity extends AppCompatActivity {
                 Intent settings = new Intent(this, SettingsActivity.class);
                 startActivity(settings);
                 return true;
-            case R.id.test_notification:
-                setupAlarm();
-                return true;
             case R.id.exit:
                 System.exit(0);
                 return true;
@@ -115,28 +112,6 @@ public class ItemListActivity extends AppCompatActivity {
         }
     }
 
-    private void setupAlarm() {
-
-        alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-        intent.putExtra("requestCode", 1);
-        intent.putExtra("product", "Nescafe");
-        intent.putExtra("expiryDate", "31/12/2012");
-
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        int notifybefore = Integer.parseInt(sharedPref.getString("notification_times", "5"));
-
-        alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 10, intent, 0);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 14);
-        calendar.set(Calendar.MINUTE, 07);
-
-        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                1000 * 60 * 20, alarmIntent);
-
-    }
 
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {

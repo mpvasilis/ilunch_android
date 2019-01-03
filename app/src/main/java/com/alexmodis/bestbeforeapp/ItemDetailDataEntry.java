@@ -6,10 +6,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +26,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import io.realm.Realm;
@@ -37,6 +40,10 @@ public class ItemDetailDataEntry extends AppCompatActivity {
     private EditText quantityField;
     private EditText expiryDateField;
     private EditText barcodeField;
+
+    private PendingIntent pendingIntent;
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
 
     private ImageButton expiryDatescan;
 
@@ -64,6 +71,9 @@ public class ItemDetailDataEntry extends AppCompatActivity {
                 startActivityForResult(barcodeScanner, 200);
             }
         });
+
+        Intent alarmIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 100, alarmIntent, 0);
 
     }
 
@@ -150,12 +160,13 @@ public class ItemDetailDataEntry extends AppCompatActivity {
 
             final RealmResults<Item> items = realm.where(Item.class).findAll();
             int size = items.size();
-            // Increment index
             int nextID = (size + 1);
 
             newItem.newItem(nextID, name, quantity, expiryDate, barcode);
             realm.copyToRealmOrUpdate(newItem);
             realm.commitTransaction();
+
+            if (quantity > 0) setupAlarm(nextID, name, expiryDate);
 
             toastText = "Product Saved!";
             Toast toast = Toast.makeText(context, toastText, duration);
@@ -166,6 +177,50 @@ public class ItemDetailDataEntry extends AppCompatActivity {
         }
 
     }
+
+
+    public void setupAlarm(int nextID, String name, Date expiryDate) {
+
+        String item_expiryDate;
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        item_expiryDate = df.format(expiryDate);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        int notifybefore = Integer.parseInt(sharedPref.getString("notification_times", "5"));
+        boolean notification_repeat = sharedPref.getBoolean("notification_repeat", true);
+
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(expiryDate);
+        cal.add(Calendar.DATE, -notifybefore);
+        Date firstdaytonotify = cal.getTime();
+
+        String firstdaytonotifystr = df.format(firstdaytonotify);
+        String firstdaytonotifyarray[] = firstdaytonotifystr.split("/");
+
+
+        alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        intent.putExtra("requestCode", nextID);
+        intent.putExtra("product", name);
+        intent.putExtra("expiryDate", item_expiryDate);
+
+        alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 10, intent, 0);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Integer.parseInt(firstdaytonotifyarray[2]), Integer.parseInt(firstdaytonotifyarray[1]), Integer.parseInt(firstdaytonotifyarray[0]), 18, 00);
+
+        if (notification_repeat) {
+            alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY, alarmIntent);
+        } else {
+            alarmMgr.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
+
+        }
+
+    }
+
 
     public void cancelNewItemButton(View view) {
         cancelNewItem();

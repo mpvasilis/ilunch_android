@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,6 +36,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -199,12 +201,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
         }
-
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -336,12 +333,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+         /*   try {
+                SyncCredentials credentials = SyncCredentials.nickname(mEmail, true);
+                SyncUser.logInAsync(credentials, Constants.AUTH_URL, new SyncUser.Callback<SyncUser>() {
+                @Override
+                    public void onSuccess(SyncUser user) {
+                        showProgress(false);
+                        SyncConfiguration configuration = SyncUser.current().getDefaultConfiguration();
+                        Realm.setDefaultConfiguration(configuration);
+                    }
+                    @Override
+                    public void onError(ObjectServerError error) {
+                        showProgress(false);
+                        Log.e("Login error", error.toString());
+                    }
+                });
+            } catch (Exception e) {
                 return false;
-            }
+            }*/
 
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
