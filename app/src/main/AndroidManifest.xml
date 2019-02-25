@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.alexmodis.bestbeforeapp">
+    package="com.vasilis.ilunch">
 
     <uses-feature android:name="android.hardware.camera" />
 
@@ -29,57 +29,46 @@
             android:required="false" />
 
         <activity
-            android:name=".ItemListActivity"
+            android:name="com.vasilis.ilunch.ItemListActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
-            android:name=".ItemDetailActivity"
+            android:name="com.vasilis.ilunch.ItemDetailActivity"
             android:label="@string/title_item_detail"
-            android:parentActivityName=".ItemListActivity"
+            android:parentActivityName="com.vasilis.ilunch.ItemListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.alexmodis.bestbeforeapp.ItemListActivity" />
+                android:value="com.vasilis.ilunch.ItemListActivity" />
         </activity>
         <activity
-            android:name=".ItemDetailDataEntry"
+            android:name="com.vasilis.ilunch.ItemDetailDataEntry"
             android:label="@string/title_item_detail"
-            android:parentActivityName=".ItemDetailDataEntry"
+            android:parentActivityName="com.vasilis.ilunch.ItemDetailDataEntry"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.alexmodis.bestbeforeapp.ItemListActivity" />
+                android:value="com.vasilis.ilunch.ItemListActivity" />
             <meta-data
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"
                 android:value="barcode,ocr" />
         </activity>
         <activity
-            android:name=".BarcodeScanner.BarcodeScannerActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ExpiryDateScanner.ExpiryDateScannerActivity"
+            android:name="com.vasilis.ilunch.BarcodeScanner.BarcodeScannerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <receiver
-            android:name=".AlarmReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.vasilis.ilunch.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".ItemListActivity">
+            android:parentActivityName="com.vasilis.ilunch.ItemListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.alexmodis.bestbeforeapp.ItemListActivity" />
+                android:value="com.vasilis.ilunch.ItemListActivity" />
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name="com.vasilis.ilunch.LoginActivity"
             android:label="@string/title_activity_login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -87,7 +76,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".NotificationActivity"></activity>
     </application>
 
 </manifest>

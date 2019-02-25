@@ -5,19 +5,19 @@
     android:layout_height="match_parent"
     tools:context=".BarcodeScanner.BarcodeScannerActivity">
 
-    <com.alexmodis.bestbeforeapp.BarCodeScannerUtil.common.CameraSourcePreview
+    <com.vasilis.ilunch.BarCodeScannerUtil.common.CameraSourcePreview
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.alexmodis.bestbeforeapp.BarCodeScannerUtil.common.GraphicOverlay
+        <com.vasilis.ilunch.BarCodeScannerUtil.common.GraphicOverlay
             android:id="@+id/barcodeOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    </com.alexmodis.bestbeforeapp.BarCodeScannerUtil.common.CameraSourcePreview>
+    </com.vasilis.ilunch.BarCodeScannerUtil.common.CameraSourcePreview>
 
-    <com.alexmodis.bestbeforeapp.BarCodeScannerUtil.OverlayView
+    <com.vasilis.ilunch.BarCodeScannerUtil.OverlayView
         android:id="@+id/overlayView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

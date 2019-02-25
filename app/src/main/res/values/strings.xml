@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Best Before App</string>
+    <string name="app_name">iLunch</string>
     <string name="item_list_item_id">#</string>
     <string name="item_list_item_name">Product</string>
     <string name="item_list_item_qty">Qty</string>
