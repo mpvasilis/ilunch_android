@@ -273,7 +273,7 @@ public class BluetoothActivity extends Activity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        String url = "http://mct.vasilis.pw/files.php";
+        String url = "http://zafora.icte.uowm.gr/~ictest01041/ilunch_latest/public/api/submitFeedback?apiKey=s@r";
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
