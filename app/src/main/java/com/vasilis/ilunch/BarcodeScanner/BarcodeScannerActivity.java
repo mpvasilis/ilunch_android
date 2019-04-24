@@ -90,7 +90,7 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         FirebaseVisionBarcodeDetectorOptions options =
                 new FirebaseVisionBarcodeDetectorOptions.Builder()
                         .setBarcodeFormats(
-                                FirebaseVisionBarcode.FORMAT_EAN_13)
+                                FirebaseVisionBarcode.FORMAT_QR_CODE)
                         .build();
 
         FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
@@ -234,32 +234,7 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     }
 
     public void processBarcode(String barcode) {
-        Realm.init(getApplicationContext());
-        RealmConfiguration realmConfig = new RealmConfiguration.
-                Builder().
-                deleteRealmIfMigrationNeeded().
-                build();
-        Realm.setDefaultConfiguration(realmConfig);
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        final RealmResults<Item> items = realm.where(Item.class).equalTo("barcode", barcode).findAll();
-        realm.commitTransaction();
-        if (items.size() > 0) {
-            final Item item = items.get(0);
-            showToast("Found product " + item.getName());
-            Intent intent = new Intent(getApplicationContext(), ItemDetailActivity.class);
-            intent.putExtra("item_id", Integer.parseInt(String.valueOf(item.getId())));
-            intent.putExtra("item_name", item.getName());
-            startActivity(intent);
-            finish();
-        } else {
-            showToast("Product not found in database. Please insert.");
-            Intent intent = new Intent(getApplicationContext(), ItemDetailDataEntry.class);
-            intent.putExtra("barcode", barcode);
-            startActivity(intent);
-            finish();
 
-        }
 
 
     }

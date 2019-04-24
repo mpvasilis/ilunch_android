@@ -72,21 +72,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        boolean use_offline = sharedPref.getBoolean("use_offline", false);
-        if (use_offline) {
-            Intent settings = new Intent(getApplicationContext(), ItemListActivity.class);
-            startActivity(settings);
-            finish();
-        }
         setContentView(R.layout.activity_login);
-        // Set up the login form.
 
 
         Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                Intent settings = new Intent(getApplicationContext(), ItemListActivity.class);
+                startActivity(settings);
             }
         });
 
@@ -97,13 +91,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         offline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putBoolean("use_offline", true);
-                editor.commit();
-                Intent settings = new Intent(getApplicationContext(), ItemListActivity.class);
+                Intent settings = new Intent(getApplicationContext(), BluetoothActivity.class);
                 startActivity(settings);
-                finish();
+
             }
         });
 

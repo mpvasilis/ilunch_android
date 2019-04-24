@@ -20,7 +20,7 @@
     <string name="item_detail_data_entry_item_expiryDate">Expiry Date</string>
     <string name="appbar_scrolling_view_behavior"> </string>
     <string name="item_detail_data_entry_item_barcode"> Barcode</string>
-    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_settings">Ρυθμίσεις</string>
 
     <string name="pref_header_general">General</string>
 
@@ -54,7 +54,7 @@
     <string name="pref_header_notifications">Notifications</string>
     <string name="repeat_notification_until_expire">Repeat notification until expire</string>
 
-    <string name="title_activity_login">Best Before - Sign in</string>
+    <string name="title_activity_login">iLunch</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>

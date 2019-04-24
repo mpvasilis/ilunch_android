@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:background="@android:color/holo_orange_dark"
-                android:text="Σαρωση καρτνν"
+                android:text="Σαρωση καρτων"
                 android:textStyle="bold" />
 
             <TextView

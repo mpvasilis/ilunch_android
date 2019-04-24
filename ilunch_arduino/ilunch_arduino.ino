@@ -5,7 +5,6 @@
 RTC_DS1307 RTC;
 #include <SPI.h>
 #include <SD.h>
-#include <assert.h>
 
 const int rs = 10, en = 9, d4 = 5, d5 = 6, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -22,12 +21,13 @@ void setup() {
     Serial.begin(9600);
     Wire.begin();
     RTC.begin();
-    btm.begin(9600);
-    
-    if (!SD.begin(4)) {
-    btm.println("SD card initialization failed!");
+
+  Serial.print("Initializing SD card...");
+
+  if (!SD.begin(4)) {
+    Serial.println("initialization failed!");
     while (1);
-    }
+  }
 
     lcd.begin(16, 2);
     lcd.print(msg);
@@ -38,7 +38,7 @@ void setup() {
     pinMode(A2,INPUT);
     pinMode(A3,INPUT);
 
-    
+    btm.begin(9600);
 }
 
 void loop() {
@@ -129,138 +129,44 @@ void processCommand(){
    case 'D': 
       lcd.clear();
       lcd.setCursor(1, 0);
-      lcd.print("Sending data...");
-      delay(1000); 
+      lcd.print("Downloading");
       download();
-      lcd.clear();
-      lcd.setCursor(1, 0);
-      lcd.print("Success!");
-      delay(2000); 
       lcd.clear();
       lcd.begin(16, 2);
       lcd.print(msg);
    break; 
    case 'T': 
-      lcd.clear();
-      lcd.setCursor(3, 0);
-      lcd.print("Setting Time...");
-      delay(2000);
-      setTime();
-      lcd.clear();
-      lcd.begin(16, 2);
-      lcd.print(msg);
+    RTC.adjust(DateTime(2019, 02, 10, 19, 8, 0));   
    break; 
    case 'N': 
-      lcd.clear();
-      lcd.setCursor(3, 0);
-      lcd.print("Setting message...");
-      delay(2000);
-      setMSG();
-      lcd.clear();
-      lcd.begin(16, 2);
-      lcd.print(msg);
-   break; 
-   case 'R': 
-      lcd.clear();
-      lcd.setCursor(3, 0);
-      lcd.print("Resetting message...");
-      delay(2000);
-      strcpy(msg, "     iLunch");  
-      lcd.clear();
-      lcd.begin(16, 2);
-      lcd.print(msg);
+   strcpy(msg, "");
    break; 
  } 
 } 
 
-void setMSG(){
-     char** tokens;
-     tokens = str_split(data, ':');
-     if (tokens)
-     {
-       strcpy(msg, *(tokens + 1));  
-       free(tokens);
-    }   
-}
-
-void setTime(){
-     char** tokens;
-     tokens = str_split(data, ':');
-     if (tokens)
-     {
-       RTC.adjust(DateTime(*(tokens + 1), *(tokens + 2), *(tokens + 3), *(tokens + 4), *(tokens + 5), *(tokens + 6)));  
-       free(tokens);
-    }
-}
-
 void writeFile(char rate){
  DateTime now = RTC.now();
- ratings = SD.open("ratings.ilunch", FILE_WRITE);
+ ratings = SD.open("ratings.txt", FILE_WRITE);
   if (ratings) {
     ratings.print(now.unixtime());
     ratings.print(",");
     ratings.println(rate);
     ratings.close();
-    btm.println("success");
   } else {
-    btm.println("Error writing rating on file.");
+    Serial.println("error opening file");
   }
 }
 
 int download(){
-    ratings = SD.open("ratings.ilunch");
+    ratings = SD.open("ratings.txt");
   if (ratings) {
     while (ratings.available()) {
       btm.write(ratings.read());
     }
     ratings.close();
-    SD.remove("ratings.ilunch");
+    SD.remove("ratings.txt");
   } else {
-    btm.println("No data exist on devide.");
+    btm.println("No data");
   }
   return 0;
-}
-
-
-char** str_split(char* a_str, const char a_delim)
-{
-    char** result    = 0;
-    size_t count     = 0;
-    char* tmp        = a_str;
-    char* last_comma = 0;
-    char delim[2];
-    delim[0] = a_delim;
-    delim[1] = 0;
-    while (*tmp)
-    {
-        if (a_delim == *tmp)
-        {
-            count++;
-            last_comma = tmp;
-        }
-        tmp++;
-    }
-
-    count += last_comma < (a_str + strlen(a_str) - 1);
-
-    count++;
-
-    result = malloc(sizeof(char*) * count);
-
-    if (result)
-    {
-        size_t idx  = 0;
-        char* token = strtok(a_str, delim);
-
-        while (token)
-        {
-            assert(idx < count);
-            *(result + idx++) = strdup(token);
-            token = strtok(0, delim);
-        }
-        assert(idx == count - 1);
-        *(result + idx) = 0;
-    }
-
-    return result;
 }

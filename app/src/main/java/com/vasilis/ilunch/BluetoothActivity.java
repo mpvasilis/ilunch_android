@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,7 +64,7 @@ import io.palaima.smoothbluetooth.Device;
 import io.palaima.smoothbluetooth.SmoothBluetooth;
 
 
-public class BluetoothActivity extends Activity {
+public class BluetoothActivity extends AppCompatActivity {
 
     public static final int ENABLE_BT__REQUEST = 1;
 
@@ -109,8 +111,14 @@ public class BluetoothActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_main);
+
+        // Show the Up button in the action bar.
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle("Διαχείρηση τερματικών");
+        }
 
         // mSmoothBluetooth = new SmoothBluetooth(this);
         mSmoothBluetooth = new SmoothBluetooth(getApplicationContext());
@@ -431,7 +439,7 @@ public class BluetoothActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        //getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
@@ -440,10 +448,9 @@ public class BluetoothActivity extends Activity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                Intent intent = new Intent(this, Settings.class);
-                startActivityForResult(intent, 0);
+     /*   switch (item.getItemId()) {
+           case R.id.action_settings:
+
                 return true;
             case R.id.action_data:
                 Intent intent2 = new Intent(this, Data.class);
@@ -456,21 +463,21 @@ public class BluetoothActivity extends Activity {
             default:
                 return super.onOptionsItemSelected(item);
 
-        }
-
+        }*/
+        return true;
     }
 
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
-                .setMessage("Are you sure you want to exit?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setMessage("Θέλετε σίγουρα να αποχωρήσετε;")
+                .setPositiveButton("ΝΑΙ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         BluetoothActivity.super.onBackPressed();
                     }
                 })
-                .setNegativeButton("No", null)
+                .setNegativeButton("ΟΧΙ", null)
                 .show();
 
 
@@ -501,13 +508,13 @@ public class BluetoothActivity extends Activity {
 
         @Override
         public void onConnecting(Device device) {
-            mStateTv.setText("Connecting to");
+            mStateTv.setText("Σύνδεση σε: ");
             mDeviceTv.setText(device.getName());
         }
 
         @Override
         public void onConnected(Device device) {
-            mStateTv.setText("Connected to");
+            mStateTv.setText("Συνδέθηκε σε: ");
             mDeviceTv.setText(device.getName());
             mConnectionLayout.setVisibility(View.GONE);
             mDiscLayout.setVisibility(View.VISIBLE);
@@ -522,7 +529,7 @@ public class BluetoothActivity extends Activity {
 
         @Override
         public void onDisconnected() {
-            mStateTv.setText("Disconnected");
+            mStateTv.setText("Δεν υπάρχει σύνδεση σε τερματικό.");
             mDeviceTv.setText("");
             mDisconnectButton.setVisibility(View.GONE);
             mDiscLayout.setVisibility(View.GONE);
@@ -535,9 +542,9 @@ public class BluetoothActivity extends Activity {
 
         @Override
         public void onConnectionFailed(Device device) {
-            mStateTv.setText("Disconnected");
+            mStateTv.setText("Δεν υπάρχει σύνδεση σε τερματικό.");
             mDeviceTv.setText("");
-            Toast.makeText(BluetoothActivity.this, "Failed to connect to " + device.getName(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(BluetoothActivity.this, "Η σύνδεση σε  " + device.getName()+ " απέτυχε", Toast.LENGTH_SHORT).show();
             if (device.isPaired()) {
                 mSmoothBluetooth.doDiscovery();
             }
@@ -545,7 +552,7 @@ public class BluetoothActivity extends Activity {
 
         @Override
         public void onDiscoveryStarted() {
-            Toast.makeText(BluetoothActivity.this, "Searching", Toast.LENGTH_SHORT).show();
+            Toast.makeText(BluetoothActivity.this, "Γίνετε αναζήτηση συσκευών....", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -555,7 +562,7 @@ public class BluetoothActivity extends Activity {
 
         @Override
         public void onNoDevicesFound() {
-            Toast.makeText(BluetoothActivity.this, "No device found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(BluetoothActivity.this, "Δεν βρέθηκε κάποια συσκευή", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -563,7 +570,7 @@ public class BluetoothActivity extends Activity {
                                    final SmoothBluetooth.ConnectionCallback connectionCallback) {
 
             final MaterialDialog dialog = new MaterialDialog.Builder(BluetoothActivity.this)
-                    .title("Devices")
+                    .title("Συσκευές")
                     .adapter(new DevicesAdapter(BluetoothActivity.this, deviceList), null)
                     .build();
 
@@ -615,9 +622,9 @@ public class BluetoothActivity extends Activity {
                 }
                 else if (sb.toString().contains("success")) {
                // success=true;
-                mResponseBuffer.add(0, "Data transfer success!");
+                mResponseBuffer.add(0, "Επιτυχής μεταφορά δεδομένων.");
                 mResponsesAdapter.notifyDataSetChanged();
-                Toast.makeText(BluetoothActivity.this, "Data transfer success!", Toast.LENGTH_LONG).show();
+                Toast.makeText(BluetoothActivity.this, "Επιτυχής μεταφορά δεδομένων.", Toast.LENGTH_LONG).show();
                 //cpuwakelock(false);
                 //handler.removeCallbacks(runnable);
 
