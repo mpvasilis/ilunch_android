@@ -2,7 +2,6 @@ package com.vasilis.ilunch.BarcodeScanner;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +13,16 @@ import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
 import com.vasilis.ilunch.BarCodeScannerUtil.BarcodeScanningProcessor;
 import com.vasilis.ilunch.BarCodeScannerUtil.BarcodeScanningProcessor.BarcodeResultListener;
 import com.vasilis.ilunch.BarCodeScannerUtil.OverlayView;
@@ -21,25 +30,15 @@ import com.vasilis.ilunch.BarCodeScannerUtil.common.CameraSource;
 import com.vasilis.ilunch.BarCodeScannerUtil.common.CameraSourcePreview;
 import com.vasilis.ilunch.BarCodeScannerUtil.common.FrameMetadata;
 import com.vasilis.ilunch.BarCodeScannerUtil.common.GraphicOverlay;
-import com.vasilis.ilunch.Item;
-import com.vasilis.ilunch.ItemDetailActivity;
-import com.vasilis.ilunch.ItemDetailDataEntry;
 import com.vasilis.ilunch.R;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
 
 public class BarcodeScannerActivity extends AppCompatActivity {
     public static final int PERMISSION_REQUEST_CAMERA = 1001;
@@ -63,7 +62,7 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     private Toast toast;
 
     boolean isAdded = false;
-
+    RequestQueue queue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -75,6 +74,7 @@ public class BarcodeScannerActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_barcode_scanner);
+        queue = Volley.newRequestQueue(this);  // this = context
 
         ButterKnife.bind(this);
 
@@ -202,7 +202,7 @@ public class BarcodeScannerActivity extends AppCompatActivity {
 
                 for (FirebaseVisionBarcode barCode : barcodes) {
 
-                    showToast("Barcode detected " + barCode.getRawValue());
+                    //showToast("Barcode detected " + barCode.getRawValue());
                     processBarcode(barCode.getRawValue());
                     finish();
                 }
@@ -229,12 +229,41 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         if (toast != null) {
             toast.cancel();
         }
+        if (message.equals("3")) {
+            message = "Λυπούμαστε αλλά όπως φαίνεται έχετε φάει!'";
+        } else if (message.equals("2")) {
+            message = "Λυπούμαστε, η συνδρομή σας έχει λήξει, επικοινωνήστε με τον υπεύθυνο της λέσχης για ανανέωση της συνδρομής σας.";
+        } else if (message.equals("1")) {
+            message = "Η συνδρομή σας δεν περιελαμβάνει αυτό τον τύπο γεύματος!";
+        } else if (message.equals("0")) {
+            message = "Δεκτό!";
+        }
         toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG);
         toast.show();
     }
 
     public void processBarcode(String barcode) {
 
+        String url = "https://ilunch.vasilis.pw/api/validateCustomer/" + barcode + "?apiKey=s@r";
+        Log.d("url", url);
+        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    // response
+                    Log.d("Response", response);
+                    showToast(response.toString());
+                },
+                error -> {
+                    // error
+                    Log.d("Error.Response", error.toString());
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                return params;
+            }
+        };
+        queue.add(postRequest);
 
 
     }

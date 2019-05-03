@@ -2,7 +2,6 @@ package com.vasilis.ilunch;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -39,8 +38,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -281,29 +278,23 @@ public class BluetoothActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        String url = "http://zafora.icte.uowm.gr/~ictest01041/ilunch_latest/public/api/submitFeedback?apiKey=s@r";
+        String url = "http://zafora.icte.uowm.gr/~ictest01041/ilunch_v06/public/api/submitFeedback?apiKey=s@r";
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // response
-                        Log.d("Response", response);
-                        mResponseBuffer.add(0, "Success! " + response);
-                        mResponsesAdapter.notifyDataSetChanged();
-                        uploadedfilefinal.delete();
-                        Toast.makeText(BluetoothActivity.this, "Success! " + response, Toast.LENGTH_SHORT).show();
-                    }
+                response -> {
+                    // response
+                    Log.d("Response", response);
+                    mResponseBuffer.add(0, "Success! " + response);
+                    mResponsesAdapter.notifyDataSetChanged();
+                    uploadedfilefinal.delete();
+                    Toast.makeText(BluetoothActivity.this, "Success! " + response, Toast.LENGTH_SHORT).show();
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        Log.d("Error.Response", error.toString());
-                        mResponseBuffer.add(0, "Error uploading data for " + finalfilename + ". " + error.toString());
-                        mResponsesAdapter.notifyDataSetChanged();
-                        Toast.makeText(BluetoothActivity.this, "Error uploading data for " + finalfilename + ". " + error.toString(), Toast.LENGTH_SHORT).show();
+                error -> {
+                    // error
+                    Log.d("Error.Response", error.toString());
+                    mResponseBuffer.add(0, "Error uploading data for " + finalfilename + ". " + error.toString());
+                    mResponsesAdapter.notifyDataSetChanged();
+                    Toast.makeText(BluetoothActivity.this, "Error uploading data for " + finalfilename + ". " + error.toString(), Toast.LENGTH_SHORT).show();
 
-                    }
                 }
         ) {
             @Override
