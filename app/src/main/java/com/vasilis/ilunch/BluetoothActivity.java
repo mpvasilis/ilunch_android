@@ -40,6 +40,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -262,8 +263,13 @@ public class BluetoothActivity extends AppCompatActivity {
         return inFiles;
     }
 
+    ArrayList ratingsDataarray = new ArrayList<ratingsData>();
 
     public void postData(StringBuilder filedata, File uploadedfile) {
+
+
+        Gson gson = new Gson();
+        String json = gson.toJson(ratingsDataarray);
 
         final String postdata = filedata.toString();
         final File uploadedfilefinal = uploadedfile;
@@ -278,7 +284,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        String url = "http://zafora.icte.uowm.gr/~ictest01041/ilunch_v06/public/api/submitFeedback?apiKey=s@r";
+        String url = "https://ilunch.vasilis.pw/api/submitFeedback?apiKey=s@r";
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 response -> {
                     // response
@@ -290,7 +296,9 @@ public class BluetoothActivity extends AppCompatActivity {
                 },
                 error -> {
                     // error
-                    Log.d("Error.Response", error.toString());
+                    Log.e("Error.Response", error.toString());
+                    Log.e("Error.Response", new String(error.networkResponse.data).split("<h3 class=\"trace-class\">")[1]);
+
                     mResponseBuffer.add(0, "Error uploading data for " + finalfilename + ". " + error.toString());
                     mResponsesAdapter.notifyDataSetChanged();
                     Toast.makeText(BluetoothActivity.this, "Error uploading data for " + finalfilename + ". " + error.toString(), Toast.LENGTH_SHORT).show();
@@ -300,9 +308,7 @@ public class BluetoothActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("data", postdata);
-                params.put("name", finalfilename);
-
+                params.put("data", json);
 
                 return params;
             }
@@ -367,6 +373,15 @@ public class BluetoothActivity extends AppCompatActivity {
                         while (line != null) {
                             line = reader.readLine();
                             total.append(line + "|");
+                            try {
+                                Log.d("line", line.toString());
+                                ratingsData obj = new ratingsData(line.split(",")[1], line.split(",")[0]);
+                                ratingsDataarray.add(obj);
+                            } catch (Exception e) {
+                                Log.e("error", e.toString());
+
+                            }
+
                         }
                         postData(total, file);
 
