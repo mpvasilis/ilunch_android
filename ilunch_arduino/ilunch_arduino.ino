@@ -19,15 +19,16 @@ File ratings;
 void setup() {
 
     Serial.begin(9600);
+
+    Serial.print("Initializing SD card...");
+    if (!SD.begin(4)) {
+      Serial.println("initialization failed!");
+      while (1);
+    }
+    Serial.print("SD card ready!");
+
     Wire.begin();
     RTC.begin();
-
-  Serial.print("Initializing SD card...");
-
-  if (!SD.begin(4)) {
-    Serial.println("initialization failed!");
-    while (1);
-  }
 
     lcd.begin(16, 2);
     lcd.print(msg);
@@ -73,7 +74,7 @@ void loop() {
         lcd.clear();
         lcd.begin(16, 2);
         lcd.print(msg);
-        writeFile('2');
+        writeFile('3');
     }
 
     if(analogRead(A2)>500)
@@ -85,7 +86,7 @@ void loop() {
         lcd.clear();
         lcd.begin(16, 2);
         lcd.print(msg);
-        writeFile('3');
+        writeFile('4');
 
     }
 
@@ -98,7 +99,7 @@ void loop() {
         lcd.clear();
         lcd.begin(16, 2);
         lcd.print(msg);
-        writeFile('4');
+        writeFile('5');
 
     }
 
@@ -169,4 +170,64 @@ int download(){
     btm.println("No data");
   }
   return 0;
+}
+
+int syncTime(){
+    char** tokens;
+
+    printf("months=[%s]\n\n", months);
+
+    tokens = str_split(months, ',');
+
+    if (tokens)
+    {
+        int i;
+        for (i = 0; *(tokens + i); i++)
+        {
+            printf("month=[%s]\n", *(tokens + i));
+            free(*(tokens + i));
+        }
+        printf("\n");
+        free(tokens);
+    }
+}
+
+
+char** str_split(char* a_str, const char a_delim)
+{
+    char** result    = 0;
+    size_t count     = 0;
+    char* tmp        = a_str;
+    char* last_comma = 0;
+    char delim[2];
+    delim[0] = a_delim;
+    delim[1] = 0;
+
+    while (*tmp)
+    {
+        if (a_delim == *tmp)
+        {
+            count++;
+            last_comma = tmp;
+        }
+        tmp++;
+    }
+    count += last_comma < (a_str + strlen(a_str) - 1);
+    count++;
+    result = malloc(sizeof(char*) * count);
+    if (result)
+    {
+        size_t idx  = 0;
+        char* token = strtok(a_str, delim);
+
+        while (token)
+        {
+            assert(idx < count);
+            *(result + idx++) = strdup(token);
+            token = strtok(0, delim);
+        }
+        assert(idx == count - 1);
+        *(result + idx) = 0;
+    }
+    return result;
 }

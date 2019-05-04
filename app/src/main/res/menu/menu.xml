@@ -1,11 +1,1 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/add_product"
-        android:title="Add product manually" />
-    <item
-        android:id="@+id/settings"
-        android:title="Settings" />
-    <item
-        android:id="@+id/exit"
-        android:title="Logout" />
-</menu>
+<menu />

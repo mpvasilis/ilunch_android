@@ -15,7 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.google.firebase.FirebaseApp;
@@ -68,7 +67,7 @@ public class ItemListActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
+        //inflater.inflate(R.menu.menu, menu);
         return true;
     }
 
@@ -77,9 +76,9 @@ public class ItemListActivity extends AppCompatActivity {
         startActivity(barcodeScanner);
     }
 
-    @Override
+    /*  @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+      switch (item.getItemId()) {
             case R.id.add_product:
                 Intent intent = new Intent(getApplicationContext(), ItemDetailDataEntry.class);
                 startActivity(intent);
@@ -94,7 +93,7 @@ public class ItemListActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
+    }*/
 
 
 

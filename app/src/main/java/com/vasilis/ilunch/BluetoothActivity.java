@@ -90,6 +90,7 @@ public class BluetoothActivity extends AppCompatActivity {
     private Button mSendButton;
 
     private Button upload;
+    private Button databtn;
 
     private Button time;
 
@@ -204,6 +205,20 @@ public class BluetoothActivity extends AppCompatActivity {
             }
 
         });
+
+
+        databtn = (Button) findViewById(R.id.data);
+        databtn.setOnClickListener(v -> {
+            try {
+                Intent intent2 = new Intent(BluetoothActivity.this, Data.class);
+                startActivity(intent2);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+
         upload = (Button) findViewById(R.id.upload);
         upload.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -62,14 +63,25 @@ public class Data extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data);
         final ListView lv;
+        ArrayList<String> files2;
         try {
             ArrayList<String> FilesInFolder = new ArrayList<String>();
             FilesInFolder = GetFiles(s + "/files");
             lv = (ListView) findViewById(R.id.filelist);
-            final ArrayList<String> files2 = new ArrayList<String>();
-            files2.addAll(FilesInFolder);
+            files2 = new ArrayList<String>();
+            for (String file : FilesInFolder) {
+                try {
+                    Log.d("fies", file);
+                    if (file.split(".")[1].contains("log")) {
+                        files2.add(file);
+                    }
+                } catch (Exception e) {
+
+                }
+
+            }
             lv.setAdapter(new ArrayAdapter<String>(this,
-                    android.R.layout.simple_list_item_1, FilesInFolder));
+                    android.R.layout.simple_list_item_1, files2));
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
