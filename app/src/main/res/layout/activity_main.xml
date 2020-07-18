@@ -65,12 +65,12 @@
                 style="?android:textAppearanceSmall"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
                 android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
 
                 android:layout_weight="1"
                 android:background="@color/colorAccent"
-                android:text="ΔΕΔΟΜΕΝΑ"
+                android:text="ΜΗΝΥΜΑΤΑ"
                 android:textColor="@android:color/white" />
 
             <Button

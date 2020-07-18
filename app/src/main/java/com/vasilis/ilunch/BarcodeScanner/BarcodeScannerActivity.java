@@ -243,17 +243,21 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     }
 
     public void processBarcode(String barcode) {
+        Log.d("barcode", barcode);
 
-        String url = "https://ilunch.vasilis.pw/api/validateCustomer/" + barcode + "?apiKey=s@r";
+        String url = "https://zafora.ece.uowm.gr/~ictest01041/ilunch_v10/public/api/validateCustomer/" + barcode + "?apiKey=s@r";
+        if (barcode.contains("[a-zA-Z]+") == false && barcode.length() < 15)
+            url = "https://zafora.ece.uowm.gr/~ictest01041/ilunch_v10/public/api/ckeckFreeSitisi/" + barcode + "?apiKey=s@r";
         Log.d("url", url);
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 response -> {
                     // response
                     Log.d("Response", response);
-                    showToast(response.toString());
+                    showToast(response);
                 },
                 error -> {
-                    // error
+                    toast = Toast.makeText(getApplicationContext(), "Δεν είναι δυνατή η σύνδεση με τον διακομιστή ή δεν σαρώθηκε έγκυρος QR κωδικός", Toast.LENGTH_LONG);
+                    toast.show();
                     Log.d("Error.Response", error.toString());
                 }
         ) {

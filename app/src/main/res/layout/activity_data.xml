@@ -9,12 +9,77 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.vasilis.ilunch.Data">
 
-    <ListView
+
+    <TextView
+        android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/filelist"
-        android:layout_alignParentTop="true"
+        android:text="Μηνύματα"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+
+    <EditText
+        android:id="@+id/food_name_1"
+        android:layout_width="match_parent"
+        android:layout_below="@id/textView5"
+        android:layout_height="wrap_content"
+        android:hint="Μήνυμα φαγητού 1" />
+
+    <EditText
+        android:id="@+id/food_name_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/food_name_1"
+        android:hint="Μήνυμα φαγητού 2" />
+
+    <EditText
+        android:id="@+id/food_name_3"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_below="@id/food_name_2"
+        android:hint="Μήνυμα φαγητού 3" />
+
+    <EditText
+        android:id="@+id/food_name_4"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_below="@id/food_name_3"
+        android:hint="Μήνυμα φαγητού 4" />
+
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:layout_below="@id/food_name_4"
+        android:text="Άλλα μηνύματα"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/front_msg"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView6"
+        android:hint="Μήνυμα αρχικής οθόνης" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/front_msg"
+        android:layout_marginTop="0dp"
         android:layout_centerHorizontal="true"
-        android:visibility="visible" />
+        android:background="@color/md_material_blue_600"
+        android:text="ΑΠΟΣΟΛΗ"
+        android:textColor="@android:color/white" />
+
 
 </RelativeLayout>

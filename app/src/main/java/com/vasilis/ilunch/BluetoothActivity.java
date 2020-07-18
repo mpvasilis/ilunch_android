@@ -106,6 +106,185 @@ public class BluetoothActivity extends AppCompatActivity {
     boolean success=false;
 
 
+    private SmoothBluetooth.Listener mListener = new SmoothBluetooth.Listener() {
+        @Override
+        public void onBluetoothNotSupported() {
+            Toast.makeText(BluetoothActivity.this, "Bluetooth not found", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        @Override
+        public void onBluetoothNotEnabled() {
+            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBluetooth, ENABLE_BT__REQUEST);
+        }
+
+        @Override
+        public void onConnecting(Device device) {
+            mStateTv.setText("Σύνδεση σε: ");
+            mDeviceTv.setText(device.getName());
+        }
+
+        @Override
+        public void onConnected(Device device) {
+            mStateTv.setText("Συνδέθηκε σε: ");
+            mDeviceTv.setText(device.getName());
+            mConnectionLayout.setVisibility(View.GONE);
+            mDiscLayout.setVisibility(View.VISIBLE);
+            mDisconnectButton.setVisibility(View.VISIBLE);
+            functions.setVisibility(View.VISIBLE);
+
+            mSendButton.setEnabled(true);
+            mSmoothBluetooth.send("C", mCRLFBox.isChecked());
+
+
+        }
+
+        @Override
+        public void onDisconnected() {
+            mStateTv.setText("Δεν υπάρχει σύνδεση σε τερματικό.");
+            mDeviceTv.setText("");
+            mDisconnectButton.setVisibility(View.GONE);
+            mDiscLayout.setVisibility(View.GONE);
+            mConnectionLayout.setVisibility(View.VISIBLE);
+            mSendButton.setEnabled(false);
+            functions.setVisibility(View.GONE);
+
+
+        }
+
+        @Override
+        public void onConnectionFailed(Device device) {
+            mStateTv.setText("Δεν υπάρχει σύνδεση σε τερματικό.");
+            mDeviceTv.setText("");
+            Toast.makeText(BluetoothActivity.this, "Η σύνδεση σε  " + device.getName() + " απέτυχε", Toast.LENGTH_SHORT).show();
+            if (device.isPaired()) {
+                mSmoothBluetooth.doDiscovery();
+            }
+        }
+
+        @Override
+        public void onDiscoveryStarted() {
+            Toast.makeText(BluetoothActivity.this, "Γίνετε αναζήτηση συσκευών....", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onDiscoveryFinished() {
+
+        }
+
+        @Override
+        public void onNoDevicesFound() {
+            Toast.makeText(BluetoothActivity.this, "Δεν βρέθηκε κάποια συσκευή", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onDevicesFound(final List<Device> deviceList,
+                                   final SmoothBluetooth.ConnectionCallback connectionCallback) {
+
+            final MaterialDialog dialog = new MaterialDialog.Builder(BluetoothActivity.this)
+                    .title("Συσκευές")
+                    .adapter(new DevicesAdapter(BluetoothActivity.this, deviceList), null)
+                    .build();
+
+            ListView listView = dialog.getListView();
+            if (listView != null) {
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        connectionCallback.connectTo(deviceList.get(position));
+                        dialog.dismiss();
+                    }
+
+                });
+            }
+
+            dialog.show();
+
+        }
+
+        int counter = 0;
+
+        @Override
+        public void onDataReceived(int data) {
+            System.out.println((char) data);
+            mBuffer.add(data);
+
+            char datar = (char) data;
+            if (datar == '\n' && !mBuffer.isEmpty()) {
+                //if (data == 0x0D && !mBuffer.isEmpty() && mBuffer.get(mBuffer.size()-2) == 0xA0) {
+                StringBuilder sb = new StringBuilder();
+                for (int integer : mBuffer) {
+                    sb.append((char) integer);
+                }
+                mBuffer.clear();
+                String s = sb.toString();
+                for (int i = 0; i < s.length(); i++) {
+                    if (s.charAt(i) == ',') {
+                        counter++;
+                    }
+                }
+                if (counter >= 2) {
+                    writefile(sb.toString(), mDeviceTv.getText().toString());
+                    //linesrecieved++;
+                    counter = 0;
+                } else if (sb.toString().contains("success")) {
+                    // success=true;
+                    mResponseBuffer.add(0, "Επιτυχής μεταφορά δεδομένων.");
+                    mResponsesAdapter.notifyDataSetChanged();
+                    Toast.makeText(BluetoothActivity.this, "Επιτυχής μεταφορά δεδομένων.", Toast.LENGTH_LONG).show();
+                    //cpuwakelock(false);
+                    //handler.removeCallbacks(runnable);
+
+                } else {
+                    try {
+                        Calendar mydate = Calendar.getInstance();
+                        //mydate.setTimeInMillis( Integer.parseInt(sb.toString().split(",")[0]));
+                        mResponseBuffer.add(0, mydate.get(Calendar.DAY_OF_MONTH) + "." + mydate.get(Calendar.MONTH) + "." + mydate.get(Calendar.YEAR) + " - " + sb.toString().split(",")[1].replaceAll("\n", "").replaceAll("1", "Bad").replaceAll("3", "Moderate").replaceAll("4", "Good").replaceAll("5", "Great"));
+                        mResponsesAdapter.notifyDataSetChanged();
+                    } catch (Exception e) {
+                        mResponseBuffer.add(0, sb.toString().replaceAll("\n", ""));
+                        mResponsesAdapter.notifyDataSetChanged();
+                    }
+                }
+
+            }
+        }
+    };
+
+    public String getDateCurrentTimeZone(long timestamp) {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            TimeZone tz = TimeZone.getTimeZone("Europe/Athens");
+            calendar.setTimeInMillis(timestamp * 1000);
+            calendar.add(Calendar.MILLISECOND, tz.getOffset(calendar.getTimeInMillis()));
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+            Date currenTimeZone = (Date) calendar.getTime();
+            return sdf.format(currenTimeZone);
+        } catch (Exception e) {
+        }
+        return "";
+    }
+
+
+    private List<File> getListFiles(File parentDir) {
+        ArrayList<File> inFiles = new ArrayList<File>();
+        File[] files = parentDir.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                inFiles.addAll(getListFiles(file));
+            } else {
+                if (file.getName().endsWith(".log")) {
+                    inFiles.add(file);
+                }
+            }
+        }
+
+        return inFiles;
+    }
+
+    ArrayList ratingsDataarray = new ArrayList<ratingsData>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -147,7 +326,14 @@ public class BluetoothActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Long tsLong = System.currentTimeMillis() / 1000;
                 String timestamp = tsLong.toString();
-                mSmoothBluetooth.send("T" + timestamp, mCRLFBox.isChecked());
+                int year = Calendar.getInstance().get(Calendar.YEAR);
+                int month = Calendar.getInstance().get(Calendar.MONTH);
+                int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+                int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+                int minute = Calendar.getInstance().get(Calendar.MINUTE);
+
+                mSmoothBluetooth.send("T", mCRLFBox.isChecked());
+                mSmoothBluetooth.send("," + year + "," + month + "," + day + "," + hour + "," + minute, mCRLFBox.isChecked());
                 String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
 
                 Toast.makeText(BluetoothActivity.this, "Setting time to: " + currentDateTimeString, Toast.LENGTH_SHORT).show();
@@ -245,93 +431,6 @@ public class BluetoothActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
 
-    }
-
-    public String getDateCurrentTimeZone(long timestamp) {
-        try {
-            Calendar calendar = Calendar.getInstance();
-            TimeZone tz = TimeZone.getTimeZone("Europe/Athens");
-            calendar.setTimeInMillis(timestamp * 1000);
-            calendar.add(Calendar.MILLISECOND, tz.getOffset(calendar.getTimeInMillis()));
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
-            Date currenTimeZone = (Date) calendar.getTime();
-            return sdf.format(currenTimeZone);
-        } catch (Exception e) {
-        }
-        return "";
-    }
-
-
-    private List<File> getListFiles(File parentDir) {
-        ArrayList<File> inFiles = new ArrayList<File>();
-        File[] files = parentDir.listFiles();
-        for (File file : files) {
-            if (file.isDirectory()) {
-                inFiles.addAll(getListFiles(file));
-            } else {
-                if (file.getName().endsWith(".log")) {
-                    inFiles.add(file);
-                }
-            }
-        }
-
-        return inFiles;
-    }
-
-    ArrayList ratingsDataarray = new ArrayList<ratingsData>();
-
-    public void postData(StringBuilder filedata, File uploadedfile) {
-
-
-        Gson gson = new Gson();
-        String json = gson.toJson(ratingsDataarray);
-
-        final String postdata = filedata.toString();
-        final File uploadedfilefinal = uploadedfile;
-        String str = uploadedfilefinal.toString();
-
-        int endIndex = str.lastIndexOf("/");
-        String filedataname = str.substring(endIndex + 1);
-        endIndex = filedataname.lastIndexOf(".");
-        filedataname = filedataname.substring(0, endIndex);
-        final String finalfilename = filedataname;
-
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        String url = "https://ilunch.vasilis.pw/api/submitFeedback?apiKey=s@r";
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                response -> {
-                    // response
-                    Log.d("Response", response);
-                    mResponseBuffer.add(0, "Success! " + response);
-                    mResponsesAdapter.notifyDataSetChanged();
-                    uploadedfilefinal.delete();
-                    Toast.makeText(BluetoothActivity.this, "Success! " + response, Toast.LENGTH_SHORT).show();
-                },
-                error -> {
-                    // error
-                    Log.e("Error.Response", error.toString());
-                    Log.e("Error.Response", new String(error.networkResponse.data).split("<h3 class=\"trace-class\">")[1]);
-
-                    mResponseBuffer.add(0, "Error uploading data for " + finalfilename + ". " + error.toString());
-                    mResponsesAdapter.notifyDataSetChanged();
-                    Toast.makeText(BluetoothActivity.this, "Error uploading data for " + finalfilename + ". " + error.toString(), Toast.LENGTH_SHORT).show();
-
-                }
-        ) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("data", json);
-
-                return params;
-            }
-        };
-        postRequest.setRetryPolicy(new DefaultRetryPolicy(7500,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        queue.add(postRequest);
     }
 
 
@@ -514,150 +613,59 @@ public class BluetoothActivity extends AppCompatActivity {
         }
     }
 
-    private SmoothBluetooth.Listener mListener = new SmoothBluetooth.Listener() {
-        @Override
-        public void onBluetoothNotSupported() {
-            Toast.makeText(BluetoothActivity.this, "Bluetooth not found", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-
-        @Override
-        public void onBluetoothNotEnabled() {
-            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBluetooth, ENABLE_BT__REQUEST);
-        }
-
-        @Override
-        public void onConnecting(Device device) {
-            mStateTv.setText("Σύνδεση σε: ");
-            mDeviceTv.setText(device.getName());
-        }
-
-        @Override
-        public void onConnected(Device device) {
-            mStateTv.setText("Συνδέθηκε σε: ");
-            mDeviceTv.setText(device.getName());
-            mConnectionLayout.setVisibility(View.GONE);
-            mDiscLayout.setVisibility(View.VISIBLE);
-            mDisconnectButton.setVisibility(View.VISIBLE);
-            functions.setVisibility(View.VISIBLE);
-
-            mSendButton.setEnabled(true);
-            mSmoothBluetooth.send("C", mCRLFBox.isChecked());
+    public void postData(StringBuilder filedata, File uploadedfile) {
 
 
-        }
+        Gson gson = new Gson();
+        String json = gson.toJson(ratingsDataarray);
 
-        @Override
-        public void onDisconnected() {
-            mStateTv.setText("Δεν υπάρχει σύνδεση σε τερματικό.");
-            mDeviceTv.setText("");
-            mDisconnectButton.setVisibility(View.GONE);
-            mDiscLayout.setVisibility(View.GONE);
-            mConnectionLayout.setVisibility(View.VISIBLE);
-            mSendButton.setEnabled(false);
-            functions.setVisibility(View.GONE);
+        final String postdata = filedata.toString();
+        final File uploadedfilefinal = uploadedfile;
+        String str = uploadedfilefinal.toString();
+
+        int endIndex = str.lastIndexOf("/");
+        String filedataname = str.substring(endIndex + 1);
+        endIndex = filedataname.lastIndexOf(".");
+        filedataname = filedataname.substring(0, endIndex);
+        final String finalfilename = filedataname;
 
 
-        }
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-        @Override
-        public void onConnectionFailed(Device device) {
-            mStateTv.setText("Δεν υπάρχει σύνδεση σε τερματικό.");
-            mDeviceTv.setText("");
-            Toast.makeText(BluetoothActivity.this, "Η σύνδεση σε  " + device.getName()+ " απέτυχε", Toast.LENGTH_SHORT).show();
-            if (device.isPaired()) {
-                mSmoothBluetooth.doDiscovery();
-            }
-        }
-
-        @Override
-        public void onDiscoveryStarted() {
-            Toast.makeText(BluetoothActivity.this, "Γίνετε αναζήτηση συσκευών....", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onDiscoveryFinished() {
-
-        }
-
-        @Override
-        public void onNoDevicesFound() {
-            Toast.makeText(BluetoothActivity.this, "Δεν βρέθηκε κάποια συσκευή", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onDevicesFound(final List<Device> deviceList,
-                                   final SmoothBluetooth.ConnectionCallback connectionCallback) {
-
-            final MaterialDialog dialog = new MaterialDialog.Builder(BluetoothActivity.this)
-                    .title("Συσκευές")
-                    .adapter(new DevicesAdapter(BluetoothActivity.this, deviceList), null)
-                    .build();
-
-            ListView listView = dialog.getListView();
-            if (listView != null) {
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        connectionCallback.connectTo(deviceList.get(position));
-                        dialog.dismiss();
-                    }
-
-                });
-            }
-
-            dialog.show();
-
-        }
-        int counter = 0;
-
-        @Override
-        public void onDataReceived(int data) {
-            mBuffer.add(data);
-
-            char datar = (char) data;
-            if (datar == '\n' && !mBuffer.isEmpty()) {
-                //if (data == 0x0D && !mBuffer.isEmpty() && mBuffer.get(mBuffer.size()-2) == 0xA0) {
-                StringBuilder sb = new StringBuilder();
-                for (int integer : mBuffer) {
-                    sb.append((char) integer);
-                }
-                mBuffer.clear();
-                String s = sb.toString();
-                for (int i = 0; i < s.length(); i++) {
-                    if (s.charAt(i) == ',') {
-                        counter++;
-                    }
-                }
-                if (counter >= 2) {
-                    writefile(sb.toString(), mDeviceTv.getText().toString());
-                    //linesrecieved++;
-                    counter = 0;
-                }  else if (sb.toString().contains("lines:")) {
-                    success=false;
-                    String[] parts = sb.toString().split(":");
-                    mResponseBuffer.add(0, "Ratings to receive: " + parts[1].replaceAll("\n", ""));
+        String url = "https://zafora.ece.uowm.gr/~ictest01041/ilunch_v10/public/api/submitFeedback?apiKey=s@r";
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                response -> {
+                    // response
+                    Log.d("Response", response);
+                    mResponseBuffer.add(0, "Success! " + response);
                     mResponsesAdapter.notifyDataSetChanged();
+                    uploadedfilefinal.delete();
+                    Toast.makeText(BluetoothActivity.this, "Success! " + response, Toast.LENGTH_SHORT).show();
+                },
+                error -> {
+                    // error
+                    Log.e("Error.Response", error.toString());
+                    Log.e("Error.Response", new String(error.networkResponse.data).split("<h3 class=\"trace-class\">")[1]);
 
-                }
-                else if (sb.toString().contains("success")) {
-               // success=true;
-                mResponseBuffer.add(0, "Επιτυχής μεταφορά δεδομένων.");
-                mResponsesAdapter.notifyDataSetChanged();
-                Toast.makeText(BluetoothActivity.this, "Επιτυχής μεταφορά δεδομένων.", Toast.LENGTH_LONG).show();
-                //cpuwakelock(false);
-                //handler.removeCallbacks(runnable);
-
-                }
-                else{
-                    mResponseBuffer.add(0, sb.toString().replaceAll("\n", ""));
+                    mResponseBuffer.add(0, "Error uploading data for " + finalfilename + ". " + error.toString());
                     mResponsesAdapter.notifyDataSetChanged();
-                }
+                    Toast.makeText(BluetoothActivity.this, "Error uploading data for " + finalfilename + ". " + error.toString(), Toast.LENGTH_SHORT).show();
 
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("data", json);
+
+                return params;
             }
-        }
-    };
+        };
+        postRequest.setRetryPolicy(new DefaultRetryPolicy(7500,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        queue.add(postRequest);
+    }
 
 
 }

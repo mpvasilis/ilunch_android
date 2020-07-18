@@ -43,21 +43,20 @@ void setup() {
 }
 
 void loop() {
-    lcd.setCursor(4, 1);
+    lcd.setCursor(6, 1);
     DateTime now = RTC.now();
 
     lcd.print(now.hour(), DEC);
     lcd.print(':');
     lcd.print(now.minute(), DEC);
-    lcd.print(':');
-    lcd.print(now.second(), DEC);
+ 
 
     if(analogRead(A0)>500)
     {
         lcd.clear();
         lcd.setCursor(4, 0);
         lcd.print("Bad food!");
-        delay(2000);
+        delay(1000);
         lcd.clear();
         lcd.begin(16, 2);
         lcd.print(msg);
@@ -70,7 +69,7 @@ void loop() {
         lcd.clear();
         lcd.setCursor(1, 0);
         lcd.print("Moderate food!");
-        delay(2000);
+        delay(1000);
         lcd.clear();
         lcd.begin(16, 2);
         lcd.print(msg);
@@ -82,7 +81,7 @@ void loop() {
         lcd.clear();
         lcd.setCursor(4, 0);
         lcd.print("Good food!");
-        delay(2000);
+        delay(1000);
         lcd.clear();
         lcd.begin(16, 2);
         lcd.print(msg);
@@ -95,7 +94,7 @@ void loop() {
         lcd.clear();
         lcd.setCursor(3, 0);
         lcd.print("Great food!");
-        delay(2000);
+        delay(1000);
         lcd.clear();
         lcd.begin(16, 2);
         lcd.print(msg);
@@ -137,7 +136,18 @@ void processCommand(){
       lcd.print(msg);
    break; 
    case 'T': 
-    RTC.adjust(DateTime(2019, 02, 10, 19, 8, 0));   
+   //// RTC.adjust(DateTime(2020, 06, 25, 13, 54, 0)); 
+              //  printf("%s\n", command);
+                //                printf("%s\n", inst);
+
+    //syncTime();
+    lcd.clear();
+      lcd.setCursor(1, 0);
+      lcd.print("Time Sync");
+       delay(1000);
+      lcd.clear();
+      lcd.begin(16, 2);
+      lcd.print(msg);
    break; 
    case 'N': 
    strcpy(msg, "");
@@ -146,6 +156,8 @@ void processCommand(){
 } 
 
 void writeFile(char rate){
+      Serial.println(rate);
+
  DateTime now = RTC.now();
  ratings = SD.open("ratings.txt", FILE_WRITE);
   if (ratings) {
@@ -159,37 +171,44 @@ void writeFile(char rate){
 }
 
 int download(){
+
+
     ratings = SD.open("ratings.txt");
   if (ratings) {
+   
     while (ratings.available()) {
-      btm.write(ratings.read());
+    String buffer = ratings.readStringUntil('\n');
+    Serial.println(buffer);  
+          btm.println(buffer);  
+
     }
     ratings.close();
-    SD.remove("ratings.txt");
+        SD.remove("ratings.txt");
+
   } else {
-    btm.println("No data");
+    Serial.println("No data");
+        btm.println("No data");
   }
+
   return 0;
 }
 
 int syncTime(){
     char** tokens;
 
-    printf("months=[%s]\n\n", months);
-
-    tokens = str_split(months, ',');
+    tokens = str_split(data, ',');
 
     if (tokens)
     {
         int i;
         for (i = 0; *(tokens + i); i++)
         {
-            printf("month=[%s]\n", *(tokens + i));
-            free(*(tokens + i));
+            printf("time=[%s]\n", *(tokens + i));
         }
         printf("\n");
-        free(tokens);
+        RTC.adjust(DateTime(tokens + 1, tokens + 2, tokens + 3, tokens + 4, tokens + 5, tokens + 6));   
     }
+
 }
 
 
@@ -222,11 +241,11 @@ char** str_split(char* a_str, const char a_delim)
 
         while (token)
         {
-            assert(idx < count);
+            //assert(idx < count);
             *(result + idx++) = strdup(token);
             token = strtok(0, delim);
         }
-        assert(idx == count - 1);
+        //assert(idx == count - 1);
         *(result + idx) = 0;
     }
     return result;
