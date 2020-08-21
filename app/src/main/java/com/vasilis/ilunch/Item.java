@@ -14,8 +14,18 @@ public class                Item extends RealmObject {
     private int quantity;
     private Date expiryDate;
     private String barcode;
+    private String cardtype;
+    private String msg;
 
 
+    public void newItem(int id, String name, String cardtype, String msg) {
+        this.id = id;
+        this.name = name;
+        this.cardtype = cardtype;
+        this.msg = msg;
+        this.barcode = barcode;
+
+    }
     public void newItem(int id, String name, int quantity, Date expiryDate, String barcode) {
         this.id = id;
         this.name = name;
@@ -51,5 +61,25 @@ public class                Item extends RealmObject {
 
     public void setBarcode(String barcode) {
         this.barcode = barcode;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCardtype() {
+        return cardtype;
+    }
+
+    public void setCardtype(String cardtype) {
+        this.cardtype = cardtype;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 }

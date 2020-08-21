@@ -49,13 +49,13 @@ public class ItemListAdapter extends RealmRecyclerViewAdapter<Item, ItemListAdap
         Date expiryDate = item.getExpiryDate();
         String item_expiryDate;
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        item_expiryDate = df.format(expiryDate);
+        //item_expiryDate = df.format(expiryDate);
 
 
         holder.item_id.setText(item_id);
         holder.item_name.setText(item_name);
-        holder.item_qty.setText(item_qty);
-        holder.item_expiry.setText(item_expiryDate);
+        holder.item_qty.setText(item.getMsg());
+        holder.item_expiry.setText(item.getCardtype());
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {

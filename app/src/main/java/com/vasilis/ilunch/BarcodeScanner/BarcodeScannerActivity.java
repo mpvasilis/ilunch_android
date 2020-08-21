@@ -30,6 +30,7 @@ import com.vasilis.ilunch.BarCodeScannerUtil.common.CameraSource;
 import com.vasilis.ilunch.BarCodeScannerUtil.common.CameraSourcePreview;
 import com.vasilis.ilunch.BarCodeScannerUtil.common.FrameMetadata;
 import com.vasilis.ilunch.BarCodeScannerUtil.common.GraphicOverlay;
+import com.vasilis.ilunch.Item;
 import com.vasilis.ilunch.R;
 
 import java.io.IOException;
@@ -39,6 +40,9 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 
 public class BarcodeScannerActivity extends AppCompatActivity {
     public static final int PERMISSION_REQUEST_CAMERA = 1001;
@@ -252,8 +256,37 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 response -> {
                     // response
-                    Log.d("Response", response);
-                    showToast(response);
+                    Log.d("Response", response.split(",")[0]);
+                    String name = response.split(",")[1];
+                    String cardtype = response.split(",")[2];
+
+                    showToast(response.split(",")[0]);
+                    Item newItem = new Item();
+                    Realm.init(this);
+                    RealmConfiguration realmConfig = new RealmConfiguration.
+                            Builder().
+                            deleteRealmIfMigrationNeeded().
+                            build();
+                    Realm.setDefaultConfiguration(realmConfig);
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
+
+                    final RealmResults<Item> items = realm.where(Item.class).findAll();
+                    int size = items.size();
+                    int nextID = (size + 1);
+                    if (response.split(",")[0].equals(0)) {
+                        newItem.newItem(nextID, name, cardtype, "🍔");
+
+                    } else {
+                        newItem.newItem(nextID, name, cardtype, "❌");
+
+                    }
+
+                    realm.copyToRealmOrUpdate(newItem);
+                    realm.commitTransaction();
+
+
+                    finish();
                 },
                 error -> {
                     toast = Toast.makeText(getApplicationContext(), "Δεν είναι δυνατή η σύνδεση με τον διακομιστή ή δεν σαρώθηκε έγκυρος QR κωδικός", Toast.LENGTH_LONG);
