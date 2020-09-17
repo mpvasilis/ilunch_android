@@ -211,6 +211,7 @@ public class BluetoothActivity extends AppCompatActivity {
             mBuffer.add(data);
 
             char datar = (char) data;
+            System.out.println(datar);
             if (datar == '\n' && !mBuffer.isEmpty()) {
                 //if (data == 0x0D && !mBuffer.isEmpty() && mBuffer.get(mBuffer.size()-2) == 0xA0) {
                 StringBuilder sb = new StringBuilder();

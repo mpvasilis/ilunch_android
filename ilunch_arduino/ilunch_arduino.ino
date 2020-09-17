@@ -5,10 +5,44 @@
 RTC_DS1307 RTC;
 #include <SPI.h>
 #include <SD.h>
+#include <EEPROM.h>
+
+int eepromOffset = 0;
+int totalOffset = 0;
+
+void writeStringToEEPROM(int addrOffset, const String &strToWrite)
+{
+  byte len = strToWrite.length();
+  for (int i = 0; i < len; i++)
+  {
+    EEPROM.write(addrOffset + 1 + i, strToWrite[i]);
+  }
+}
+
+SoftwareSerial btm(7,8);
+
+String readStringFromEEPROM(int addrOffset)
+{
+  char data[totalOffset + 1];
+  for (int i = 0; i < totalOffset; i++)
+  {
+  data[i] = EEPROM.read( 1 + i);
+  Serial.print((char) EEPROM.read( 1 + i));
+  btm.print((char) EEPROM.read( 1 + i));
+  if((char) EEPROM.read( 1 + i) == "\n"){
+          delay(100);
+
+  }
+  }
+
+  
+  data[totalOffset] = '\0';
+  return String(data);
+}
+
 
 const int rs = 10, en = 9, d4 = 5, d5 = 6, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-SoftwareSerial btm(7,8);
 int index = 0; 
 char data[100]; 
 char msg[100]="     iLunch"; 
@@ -40,22 +74,41 @@ void setup() {
     pinMode(A3,INPUT);
 
     btm.begin(9600);
+
+     for (int i = 0 ; i < EEPROM.length() ; i++) {
+    EEPROM.write(i, 0);
+  }
+
+    
 }
 
+  //thhis is a list of int variables used in this clock program
+int s=0;
+int sec=0;
+int hrs=0;
+int minutes=0;
+int initialHours = 02;//variable to initiate hours
+int initialMins = 0;//variable to initiate minutes
+int initialSecs = 00;//variable to initiate seconds
+ 
+
 void loop() {
-    lcd.setCursor(6, 1);
+    lcd.setCursor(4, 1);
     DateTime now = RTC.now();
 
-    lcd.print(now.hour(), DEC);
+    printDigits(now.hour());
     lcd.print(':');
-    lcd.print(now.minute(), DEC);
- 
+    printDigits(now.minute());
+   lcd.print(':');
+  printDigits(now.second());
+
 
     if(analogRead(A0)>500)
     {
         lcd.clear();
         lcd.setCursor(4, 0);
         lcd.print("Bad food!");
+        btm.println("Bad food pressed.");
         delay(1000);
         lcd.clear();
         lcd.begin(16, 2);
@@ -69,6 +122,7 @@ void loop() {
         lcd.clear();
         lcd.setCursor(1, 0);
         lcd.print("Moderate food!");
+        btm.println("Moderate food pressed.");
         delay(1000);
         lcd.clear();
         lcd.begin(16, 2);
@@ -81,6 +135,7 @@ void loop() {
         lcd.clear();
         lcd.setCursor(4, 0);
         lcd.print("Good food!");
+        btm.println("Good food pressed.");
         delay(1000);
         lcd.clear();
         lcd.begin(16, 2);
@@ -94,6 +149,7 @@ void loop() {
         lcd.clear();
         lcd.setCursor(3, 0);
         lcd.print("Great food!");
+        btm.println("Great food pressed.");
         delay(1000);
         lcd.clear();
         lcd.begin(16, 2);
@@ -126,20 +182,64 @@ void processCommand(){
  char command = data[0]; 
  char inst = data[1]; 
  switch(command){ 
+     case 'A': 
+      lcd.clear();
+      lcd.setCursor(1, 0);
+      lcd.print("Synching...");
+      getMSG(1);
+      lcd.clear();
+      lcd.begin(16, 2);
+      lcd.print(msg);
+   break; 
+     case 'B': 
+      lcd.clear();
+      lcd.setCursor(1, 0);
+      lcd.print("Synching...");
+      getMSG(2);
+      lcd.clear();
+      lcd.begin(16, 2);
+      lcd.print(msg);
+   break; 
+        case 'C': 
+      lcd.clear();
+      lcd.setCursor(1, 0);
+      lcd.print("Synching...");
+      getMSG(3);
+      lcd.clear();
+      lcd.begin(16, 2);
+      lcd.print(msg);
+   break;
+           case 'E': 
+      lcd.clear();
+      lcd.setCursor(1, 0);
+      lcd.print("Synching...");
+      getMSG(4);
+      lcd.clear();
+      lcd.begin(16, 2);
+      lcd.print(msg);
+   break;
+            case 'F': 
+      lcd.clear();
+      lcd.setCursor(1, 0);
+      lcd.print("Synching...");
+      getMSG(5);
+      lcd.clear();
+      lcd.begin(16, 2);
+      lcd.print(msg);
+   break;
    case 'D': 
       lcd.clear();
       lcd.setCursor(1, 0);
       lcd.print("Downloading");
+      delay(100);
       download();
       lcd.clear();
       lcd.begin(16, 2);
       lcd.print(msg);
    break; 
    case 'T': 
-   //// RTC.adjust(DateTime(2020, 06, 25, 13, 54, 0)); 
-              //  printf("%s\n", command);
-                //                printf("%s\n", inst);
-
+    //RTC.adjust(DateTime(2020, 9, 06, 01, 48, 0)); 
+ printf("%s\n", inst);
     //syncTime();
     lcd.clear();
       lcd.setCursor(1, 0);
@@ -151,47 +251,50 @@ void processCommand(){
    break; 
    case 'N': 
    strcpy(msg, "");
+  
    break; 
  } 
 } 
 
 void writeFile(char rate){
-      Serial.println(rate);
+              
+  Serial.println(rate);
+  
+  DateTime now = RTC.now();
+  
+  String unixtimestamp = String(now.unixtime());
+  String ratingstr = String(rate);
+  String toWrite = unixtimestamp+","+ratingstr+"\n";
+  writeStringToEEPROM(totalOffset, toWrite);
+  totalOffset = totalOffset + toWrite.length();
+   Serial.println(toWrite);
 
- DateTime now = RTC.now();
- ratings = SD.open("ratings.txt", FILE_WRITE);
-  if (ratings) {
-    ratings.print(now.unixtime());
-    ratings.print(",");
-    ratings.println(rate);
-    ratings.close();
-  } else {
-    Serial.println("error opening file");
-  }
+
+
 }
 
 int download(){
 
+ readStringFromEEPROM(0);
 
-    ratings = SD.open("ratings.txt");
-  if (ratings) {
-   
-    while (ratings.available()) {
-    String buffer = ratings.readStringUntil('\n');
-    Serial.println(buffer);  
-          btm.println(buffer);  
-
-    }
-    ratings.close();
-        SD.remove("ratings.txt");
-
-  } else {
-    Serial.println("No data");
-        btm.println("No data");
+      for (int i = 0 ; i < EEPROM.length() ; i++) {
+    EEPROM.write(i, 0);
   }
 
   return 0;
 }
+
+void printDigits(byte digits){
+    if(digits < 10)
+        lcd.print('0');
+    lcd.print(digits);
+}
+
+int getMSG(int messagenum){
+ 
+  return 0;
+}
+
 
 int syncTime(){
     char** tokens;
