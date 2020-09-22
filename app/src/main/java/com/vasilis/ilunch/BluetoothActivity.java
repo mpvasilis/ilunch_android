@@ -204,7 +204,7 @@ public class BluetoothActivity extends AppCompatActivity {
         }
 
         int counter = 0;
-
+        StringBuilder sb;
         @Override
         public void onDataReceived(int data) {
             System.out.println((char) data);
@@ -212,9 +212,11 @@ public class BluetoothActivity extends AppCompatActivity {
 
             char datar = (char) data;
             System.out.println(datar);
+            Log.d("charrecieved", String.valueOf(datar));
+
             if (datar == '\n' && !mBuffer.isEmpty()) {
                 //if (data == 0x0D && !mBuffer.isEmpty() && mBuffer.get(mBuffer.size()-2) == 0xA0) {
-                StringBuilder sb = new StringBuilder();
+                sb = new StringBuilder();
                 for (int integer : mBuffer) {
                     sb.append((char) integer);
                 }
@@ -222,21 +224,26 @@ public class BluetoothActivity extends AppCompatActivity {
                 String s = sb.toString();
                 for (int i = 0; i < s.length(); i++) {
                     if (s.charAt(i) == ',') {
+                        Log.d("counter", String.valueOf(counter));
+
                         counter++;
                     }
                 }
-                if (counter >= 2) {
+                if (counter >= 1) {
                     writefile(sb.toString(), mDeviceTv.getText().toString());
-                    //linesrecieved++;
+                    linesrecieved++;
+                    Log.d("linesrecieved", String.valueOf(linesrecieved));
+                    Log.d("linesrecieved", sb.toString());
+
                     counter = 0;
                 } else if (sb.toString().contains("success")) {
                     // success=true;
-                    mResponseBuffer.add(0, "Επιτυχής μεταφορά δεδομένων.");
+                    mResponseBuffer.add(0, "Επιτυχής μεταφορά δεδομένων. Σύνολο: " + linesrecieved);
                     mResponsesAdapter.notifyDataSetChanged();
                     Toast.makeText(BluetoothActivity.this, "Επιτυχής μεταφορά δεδομένων.", Toast.LENGTH_LONG).show();
                     //cpuwakelock(false);
                     //handler.removeCallbacks(runnable);
-
+                    linesrecieved = 0;
                 } else {
                     try {
                         Calendar mydate = Calendar.getInstance();
@@ -439,8 +446,11 @@ public class BluetoothActivity extends AppCompatActivity {
         try {
 
             OutputStreamWriter out = new OutputStreamWriter(openFileOutput(filename + ".log", MODE_APPEND));
-            out.write(text);
-            //out.write('\n');
+            String fixed = text.replaceAll("[^\\u0000-\\uFFFF]", "");
+            fixed = fixed.replaceAll("[^\\p{ASCII}]", "");
+            fixed = fixed.replaceAll("�", "");
+            out.write(fixed);
+            Log.d("fixed", fixed);
             out.close();
 
         } catch (Throwable t) {

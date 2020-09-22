@@ -276,12 +276,12 @@ void writeFile(char rate){
 int download(){
 
  readStringFromEEPROM(0);
-
-      for (int i = 0 ; i < EEPROM.length() ; i++) {
+ btm.println("success");
+ for (int i = 0 ; i < EEPROM.length() ; i++) {
     EEPROM.write(i, 0);
-  }
+ }
 
-  return 0;
+ return 0;
 }
 
 void printDigits(byte digits){
