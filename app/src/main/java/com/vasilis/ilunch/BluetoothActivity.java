@@ -495,6 +495,16 @@ public class BluetoothActivity extends AppCompatActivity {
                         is = new FileInputStream(file);
                         reader = new BufferedReader(new InputStreamReader(is));
                         String line = reader.readLine();
+                        try {
+                            Log.d("line", line.toString());
+                            ratingsData obj = new ratingsData(line.split(",")[1], line.split(",")[0]);
+                            ratingsDataarray.add(obj);
+                            Log.d("ratingsDataarray", String.valueOf(ratingsDataarray.size()));
+
+                        } catch (Exception e) {
+                            Log.e("error", e.toString());
+
+                        }
                         while (line != null) {
                             line = reader.readLine();
                             total.append(line + "|");
@@ -502,6 +512,8 @@ public class BluetoothActivity extends AppCompatActivity {
                                 Log.d("line", line.toString());
                                 ratingsData obj = new ratingsData(line.split(",")[1], line.split(",")[0]);
                                 ratingsDataarray.add(obj);
+                                Log.d("ratingsDataarray", String.valueOf(ratingsDataarray.size()));
+
                             } catch (Exception e) {
                                 Log.e("error", e.toString());
 
@@ -509,7 +521,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
                         }
                         postData(total, file);
-
+                        file.delete();
                     }
                 }
             } else {
@@ -629,6 +641,8 @@ public class BluetoothActivity extends AppCompatActivity {
 
         Gson gson = new Gson();
         String json = gson.toJson(ratingsDataarray);
+        Log.d("json", json);
+
 
         final String postdata = filedata.toString();
         final File uploadedfilefinal = uploadedfile;
@@ -651,6 +665,7 @@ public class BluetoothActivity extends AppCompatActivity {
                     mResponseBuffer.add(0, "Success! " + response);
                     mResponsesAdapter.notifyDataSetChanged();
                     uploadedfilefinal.delete();
+                    ratingsDataarray.clear();
                     Toast.makeText(BluetoothActivity.this, "Success! " + response, Toast.LENGTH_SHORT).show();
                 },
                 error -> {

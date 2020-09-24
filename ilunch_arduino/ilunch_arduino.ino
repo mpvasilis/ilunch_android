@@ -9,6 +9,7 @@ RTC_DS1307 RTC;
 
 int eepromOffset = 0;
 int totalOffset = 0;
+int totalfeedbacks=0;
 
 void writeStringToEEPROM(int addrOffset, const String &strToWrite)
 {
@@ -176,6 +177,18 @@ void loop() {
      index = 0; 
      data[0] = '\0'; 
    } 
+
+   if(now.second()==50){
+     lcd.clear();
+        lcd.setCursor(1, 0);
+        lcd.print("Total feedbacks");
+                lcd.setCursor(8, 1);
+        lcd.print(totalfeedbacks);
+        delay(2000);
+        lcd.clear();
+            lcd.begin(16, 2);
+    lcd.print(msg);
+   }
 } 
 
 void processCommand(){ 
@@ -267,6 +280,7 @@ void writeFile(char rate){
   String toWrite = unixtimestamp+","+ratingstr+"\n";
   writeStringToEEPROM(totalOffset, toWrite);
   totalOffset = totalOffset + toWrite.length();
+  totalfeedbacks = totalfeedbacks +1;
    Serial.println(toWrite);
 
 
@@ -280,6 +294,7 @@ int download(){
  for (int i = 0 ; i < EEPROM.length() ; i++) {
     EEPROM.write(i, 0);
  }
+ totalfeedbacks=0;
 
  return 0;
 }
